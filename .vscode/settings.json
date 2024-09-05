@@ -3,5 +3,6 @@
         "LD_LIBRARY_PATH": "/usr/lib:/usr/local/lib",
         "XDG_DATA_DIRS": "/usr/share/ubuntu:/usr/share/gnome:/home/andrey/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop",
         "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/opt/gcc-arm-none-eabi/bin"
-    }
+    },
+    "makefile.configureOnOpen": true
 }
