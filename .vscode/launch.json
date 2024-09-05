@@ -1,0 +1,47 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Camera Feed",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/camera_feed",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "/usr/lib:/usr/local/lib"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "preLaunchTask": "build",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerArgs": "",
+            "customLaunchSetupCommands": [],
+            "launchCompleteCommand": "exec-run",
+            "sourceFileMap": {
+                "/mnt/c": "c:\\"
+            },
+            "targetArchitecture": "x86_64",
+            "logging": {
+                "trace": true,
+                "programOutput": true,
+                "exceptions": true,
+                "traceResponse": true,
+                "engineLogging": true,
+                "moduleLoad": true
+            },
+            "showDisplayString": true
+        }
+    ]
+}
