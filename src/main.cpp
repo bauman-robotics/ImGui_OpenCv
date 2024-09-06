@@ -191,7 +191,7 @@ int main(int, char**) {
 #include <thread>
 #include <chrono>
 
-const char font_path[] = "/home/andrey/projects/ImGui_OpenCv/src/Roboto/Roboto-Italic.ttf";
+const char font_path[] = "/home/andrey/projects/ImGui_OpenCv/src/Roboto-Italic.ttf";
 
 void LoadFonts()
 {
