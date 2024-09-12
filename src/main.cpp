@@ -1,4 +1,4 @@
-// #define USE_OPENCV
+//#define USE_OPENCV
 
 #ifdef USE_OPENCV
 
