@@ -3,11 +3,12 @@
 #include "uart.h"
 #include "view_groups.h"
 
-void ShowDemoWindow(int serial_fd)
-{
+
+void ShowDemoWindow() {
+
     // Установка позиции и размера окна
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(880, 720), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(880, 736), ImGuiCond_Always);
 
     // Начало нового окна
     ImGui::Begin("Demo Window", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
@@ -35,7 +36,7 @@ void ShowDemoWindow(int serial_fd)
     //=== Пятая группа с листбоксом данных из последовательного порта =================
     #ifdef USE_COM_PORT
 
-        View_Group_5(serial_fd);
+    View_Group_5();
 
     #endif 
 

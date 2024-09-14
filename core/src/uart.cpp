@@ -6,13 +6,35 @@
 #include <vector>
 #include <regex>
 #include <unistd.h>  // Для функции read
+#include <fcntl.h>   // Для функции open
+#include <termios.h> // Для работы с последовательным портом
+#include <thread>    // Для работы с потоками
+//============================
+#include <mutex>
+#include <atomic>
 //============================
 
-int OpenSerialPort(const char* device);
-void ReadSerialData(int fd, std::vector<std::string>& serial_data);
-int ExtractDataValue(const std::string& input);
-void CleanSerialData(std::string& data);
+std::mutex data_mutex;
+std::atomic<bool> keep_running(true);
 
+static int serial_fd = 0;
+std::thread serial_thread;
+static std::vector<std::string> serial_data;
+
+int OpenSerialPort(const char* device);
+void ReadSerialData();
+void Start_Serial_Thread();
+
+//====================================================================
+int InitSerial() {
+
+    serial_fd = OpenSerialPort("/dev/ttyACM0");
+    if (serial_fd < 0) {
+        return -1;
+    }
+    Start_Serial_Thread();
+    return 0;
+}
 //====================================================================
 
 int OpenSerialPort(const char* device)
@@ -59,49 +81,7 @@ int OpenSerialPort(const char* device)
 }
 //====================================================================
 
-// void CleanSerialData(std::string& data)
-// {
-//     // Удаление управляющих символов
-//     data.erase(std::remove_if(data.begin(), data.end(), [](char c) {
-//         return !isprint(c) && !isspace(c);
-//     }), data.end());
-// }
-//====================================================================
-
-// int ExtractDataValue(const std::string& input) {
-//     std::string keyword = "data ";
-//     size_t pos = input.find(keyword);
-    
-//     if (pos != std::string::npos) {
-//         pos += keyword.length();
-//         std::istringstream iss(input.substr(pos));
-//         int value;
-//         if (iss >> value) {
-//             return value;
-//         }
-//     }
-    
-//     // Если ключевое слово не найдено или после него нет числа, возвращаем -1 или другое значение по умолчанию
-//     return -1;
-// }
-
-//====================================================================
-
-void ReadSerialData(int fd, std::vector<std::string>& serial_data)
-{
-    char buf[256];
-    int n = read(fd, buf, sizeof(buf) - 1);
-    if (n > 0)
-    {
-        buf[n] = '\0';
-        std::string line(buf);
-        serial_data.push_back(line);
-    }
-}
-
-//================================================
-
-std::vector<int> parseComPortData(const std::vector<std::string>& serial_data) {
+std::vector<int> parseComPortData() {
     std::vector<int> results;
     std::regex pattern(R"(data (\d+))");
 
@@ -115,3 +95,42 @@ std::vector<int> parseComPortData(const std::vector<std::string>& serial_data) {
     return results;
 }
 //================================================
+
+void ReadSerialData() {
+    char buf[256];
+    while (keep_running) {
+        int n = read(serial_fd, buf, sizeof(buf) - 1);
+        if (n > 0) {
+            buf[n] = '\0';
+            std::string line(buf);
+            std::lock_guard<std::mutex> lock(data_mutex);
+            serial_data.push_back(line);
+        } else if (n < 0) {
+            std::cerr << "Ошибка чтения из последовательного порта" << std::endl;
+            break;
+        }
+    }
+}
+//================================================
+
+void Start_Serial_Thread() {
+    keep_running = true;
+    // Запуск потока для чтения данных из COM-порта
+    serial_thread = std::thread(ReadSerialData);
+}
+//================================================
+
+void ClearSerialData() {
+    std::lock_guard<std::mutex> lock(data_mutex);
+    serial_data.clear();
+}
+//================================================
+
+void CloseSerial() {
+    // Завершение потока
+    keep_running = false;
+    if (serial_thread.joinable()) {
+        serial_thread.join();
+    }
+    close(serial_fd);
+}

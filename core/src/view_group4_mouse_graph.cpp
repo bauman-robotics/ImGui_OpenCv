@@ -3,7 +3,7 @@
 void View_Group_4() {
 
     ImGuiIO& io = ImGui::GetIO();
-    ImGui::BeginChild("Group 4", ImVec2(865, 300), true);
+    ImGui::BeginChild("Group 4", ImVec2(865, 270), true);
     ImGui::Text("Группа 4");
 
     static std::vector<float> y_coords;

@@ -23,7 +23,7 @@ void RenderFrame(GLFWwindow* window) {
 
 int main(int, char**)
 {  
-    int serial_fd;
+    
     GLFWwindow *window = nullptr;
     GLuint texture;   
     
@@ -32,7 +32,7 @@ int main(int, char**)
         cv::VideoCapture cap(0);
         int init_result = Init_All_CV(cap, &texture, &window);
     #else 
-        int init_result = Init_All(&serial_fd, &window);
+        int init_result = Init_All(&window);
     #endif 
 
     if (init_result == -1) {
@@ -48,7 +48,7 @@ int main(int, char**)
 
         #ifndef USE_OPENCV  
             // Отображение демонстрационного окна
-            ShowDemoWindow(serial_fd);
+            ShowDemoWindow();
 
             // Ожидание событий вместо постоянного опроса
             #ifdef USE_COM_PORT  
@@ -82,7 +82,7 @@ int main(int, char**)
     glfwTerminate();
 
     #ifdef USE_COM_PORT
-        close(serial_fd);
+        CloseSerial();
     #endif 
 
     return 0;

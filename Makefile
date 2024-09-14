@@ -6,13 +6,13 @@ CXXFLAGS = -std=c++11 -g -I/usr/include/opencv4 -Iimgui -Ibackends -Icore/inc
 
 # Укажите файлы исходного кода
 SRCS = $(shell find core/src -name '*.cpp') \
-imgui/imgui.cpp \
-imgui/imgui_draw.cpp \
-imgui/imgui_widgets.cpp \
-imgui/imgui_demo.cpp \
-imgui/imgui_tables.cpp \
-backends/imgui_impl_glfw.cpp \
-backends/imgui_impl_opengl3.cpp
+       imgui/imgui.cpp \
+       imgui/imgui_draw.cpp \
+       imgui/imgui_widgets.cpp \
+       imgui/imgui_demo.cpp \
+       imgui/imgui_tables.cpp \
+       backends/imgui_impl_glfw.cpp \
+       backends/imgui_impl_opengl3.cpp
 
 # Укажите библиотеки для линковки
 LIBS = -lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_videoio -lglfw -lGL -lGLEW -ldl -lX11 -pthread

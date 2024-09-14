@@ -5,12 +5,13 @@ int InitGLFWAndImGui(GLFWwindow** window);
 void CreateTexture(GLuint* texture);
 
 //=========================================================================
-int Init_All(int* serial_fd, GLFWwindow** window) {
+int Init_All(GLFWwindow** window) {
     #if defined(USE_COM_PORT)
-    *serial_fd = OpenSerialPort("/dev/ttyACM0");
-    if (*serial_fd < 0) {
+
+    if (InitSerial() < 0) {
         return -1;
     }
+    
     #endif
 
     if (InitGLFWAndImGui(window) != 0) {
@@ -51,7 +52,7 @@ int InitGLFWAndImGui(GLFWwindow** window) {
         win_width = 880;
     #endif 
 
-    *window = glfwCreateWindow(win_width, 720, "ImGui Demo", NULL, NULL);
+    *window = glfwCreateWindow(win_width, 736, "ImGui Demo", NULL, NULL);
     if (!*window) {
         glfwTerminate();
         return -1;
