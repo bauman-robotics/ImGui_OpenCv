@@ -7,7 +7,7 @@ void View_Group_5(int serial_fd) {
 
     std::vector<float> y_coords;
 
-    ImGui::BeginChild("Group 5", ImVec2(865, 200), true);
+    ImGui::BeginChild("Group 5", ImVec2(865, 250), true);
     ImGui::Text("Группа 5 - Данные из последовательного порта");
 
     static std::vector<std::string> serial_data;
@@ -45,6 +45,12 @@ void View_Group_5(int serial_fd) {
     }
 
     ImGui::PlotLines("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
+ 
+    // Кнопка для очистки графика
+    if (ImGui::Button("Очистить график")) {
+        y_coords.clear();
+        serial_data.clear();
+    }
     //================================
 
     //====  Сырые данные ===========
