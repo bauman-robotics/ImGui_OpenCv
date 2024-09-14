@@ -35,6 +35,7 @@ void View_Group_5(int serial_fd) {
     // ImGui::ListBox("Листбокс 2", &item_current2, serial_data_cstr.data(), serial_data_cstr.size());
     //=================================
 
+
     //====  График значения ===========
 
     // Преобразование данных в формат для ImGui::PlotLines
