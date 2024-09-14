@@ -20,10 +20,15 @@ std::atomic<bool> keep_running(true);
 static int serial_fd = 0;
 std::thread serial_thread;
 static std::vector<std::string> serial_data;
+static std::atomic<int> packet_count(0);
+std::atomic<int> packets_per_second(0);
 
 int OpenSerialPort(const char* device);
 void ReadSerialData();
 void Start_Serial_Thread();
+void UpdatePacketsPerSecond();
+double GetPacketsPerSecond();
+
 
 //====================================================================
 int InitSerial() {
@@ -98,6 +103,7 @@ std::vector<int> parseComPortData() {
 
 void ReadSerialData() {
     char buf[256];
+    auto start_time = std::chrono::steady_clock::now();
     while (keep_running) {
         int n = read(serial_fd, buf, sizeof(buf) - 1);
         if (n > 0) {
@@ -105,6 +111,7 @@ void ReadSerialData() {
             std::string line(buf);
             std::lock_guard<std::mutex> lock(data_mutex);
             serial_data.push_back(line);
+            packet_count++;
         } else if (n < 0) {
             std::cerr << "Ошибка чтения из последовательного порта" << std::endl;
             break;
@@ -117,6 +124,14 @@ void Start_Serial_Thread() {
     keep_running = true;
     // Запуск потока для чтения данных из COM-порта
     serial_thread = std::thread(ReadSerialData);
+
+    // Запуск потока для обновления количества пакетов в секунду
+    std::thread([]() {
+        while (keep_running) {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            UpdatePacketsPerSecond();
+        }
+    }).detach();
 }
 //================================================
 
@@ -134,3 +149,20 @@ void CloseSerial() {
     }
     close(serial_fd);
 }
+//================================================
+
+double GetPacketsPerSecond() {
+    
+    return packets_per_second;
+}
+//================================================
+
+void UpdatePacketsPerSecond() {
+    static int last_count = 0;
+    int current_count = packet_count.load();
+    int packets_this_second = current_count - last_count;
+    last_count = current_count;
+
+    packets_per_second.store(packets_this_second);
+}
+//================================================

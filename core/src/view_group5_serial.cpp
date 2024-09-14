@@ -1,9 +1,16 @@
 #include "main.h"
 #include "uart.h"
+#include <atomic>
+
+
+static std::atomic<double> smoothed_packets_per_second(0.0);
+
+double CalculateEMA(double current_value, double previous_ema, double alpha);
+
 
 void View_Group_5(void) {    
 
-    //=== Пятая группа графиком даннх из последовательного порта работающего в отдельном потоке =================
+    //=== Пятая группа графиком данных из последовательного порта работающего в отдельном потоке =================
 
     std::vector<float> y_coords;
 
@@ -20,7 +27,6 @@ void View_Group_5(void) {
     for (int number : parsed_data) {
         y_coords.push_back(static_cast<float>(number));
     }
-
 
     // Радиокнопки для выбора типа графика
     static int graph_type = 0; // 0 - линии, 1 - гистограмма, 2 - окно последних значений
@@ -53,9 +59,6 @@ void View_Group_5(void) {
             ImGui::PlotLines("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
         }
     }
-    //==================================================================================
-    //ImGui::PlotLines("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
-    //================================
 
     // Кнопка для очистки графика
     if (ImGui::Button("Очистить график")) {
@@ -64,6 +67,25 @@ void View_Group_5(void) {
     }
     //================================
 
-    ImGui::EndChild();
+    ImGui::SameLine();
 
+    // Отображение количества пакетов в секунду с использованием EMA
+    double alpha = 0.1; // Коэффициент сглаживания
+   
+     double current_packets_per_second = GetPacketsPerSecond();
+    smoothed_packets_per_second.store(CalculateEMA(current_packets_per_second, smoothed_packets_per_second.load(), alpha));
+
+    // Использование stringstream для форматирования строки
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << "Пакетов в секунду: " << std::setw(6) << smoothed_packets_per_second.load();
+    ImGui::Text("%s", ss.str().c_str());
+
+
+    ImGui::EndChild();
+}
+//==================================================================================
+
+// Функция для расчета экспоненциального скользящего среднего (EMA)
+double CalculateEMA(double current_value, double previous_ema, double alpha) {
+    return alpha * current_value + (1 - alpha) * previous_ema;
 }
