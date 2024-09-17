@@ -4,14 +4,16 @@
 #include "view_groups.h"
 
 
-void ShowDemoWindow() {
+void ShowCtrlWindow() {
 
     // Установка позиции и размера окна
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(0, 38), ImGuiCond_Always);
     ImGui::SetNextWindowSize(ImVec2(880, 736), ImGuiCond_Always);
 
     // Начало нового окна
-    ImGui::Begin("Demo Window", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+    ImGui::Begin("Ctrl Window", NULL, ImGuiWindowFlags_NoMove | 
+                                      ImGuiWindowFlags_NoResize |
+                                      ImGuiWindowFlags_NoTitleBar);
 
     //=== Первая группа с рамкой ========================================================================
     View_Group_1();
@@ -34,11 +36,9 @@ void ShowDemoWindow() {
     View_Group_4();
 
     //=== Пятая группа с листбоксом данных из последовательного порта =================
-    #ifdef USE_COM_PORT
-
-    View_Group_5();
-
-    #endif 
+    if (var.com_port_mode) {
+        View_Group_5();
+    }
 
     // Конец окна
     ImGui::End();

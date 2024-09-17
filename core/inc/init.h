@@ -5,4 +5,11 @@
 
 int Init_All(GLFWwindow** window); 
 
-int Init_All_CV(cv::VideoCapture& cap, GLuint * texture, GLFWwindow** window);
+int Init_CV();
+
+void Close_CV(); 
+
+void Select_Mode(int mode);
+int Get_Mode(); 
+
+void InitFrameSize(int size); 

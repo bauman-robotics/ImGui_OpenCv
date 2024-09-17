@@ -19,19 +19,13 @@
 #include "defines.h"
 #include "fonts.h"
 #include "init.h"
+#include "variables.h"
 //==================
-
-#ifdef USE_OPENCV
-    #include <opencv2/opencv.hpp>
-    #include "cv_cap.h"
-#else 
-    #include <view.h>
-    #include <fonts.h>
-#endif 
-
-#ifdef USE_COM_PORT
-
-#endif 
+#include <opencv2/opencv.hpp>
+//==================
+#include <view.h>
+#include <fonts.h>
+//==================
 
 
 #include <termios.h>

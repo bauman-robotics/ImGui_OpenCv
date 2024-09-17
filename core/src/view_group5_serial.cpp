@@ -4,21 +4,24 @@
 
 
 static std::atomic<double> smoothed_packets_per_second(0.0);
+static std::vector<float> y_coords;
 
 double CalculateEMA(double current_value, double previous_ema, double alpha);
+void Clear_Plot_Data();
 
+//======================================
 
 void View_Group_5(void) {    
 
     //=== Пятая группа графиком данных из последовательного порта работающего в отдельном потоке =================
 
-    std::vector<float> y_coords;
-
+    
     ImGui::BeginChild("Group 5", ImVec2(865, 270), true);
     ImGui::Text("Группа 5 - Данные из последовательного порта");
 
     // Парсинг данных
-    std::vector<int> parsed_data = parseComPortData();
+
+    std::vector<int> parsed_data = parseComPortData("data");
 
     //====  График значений ===========
 
@@ -61,9 +64,8 @@ void View_Group_5(void) {
     }
 
     // Кнопка для очистки графика
-    if (ImGui::Button("Очистить график")) {
-        y_coords.clear();
-        ClearSerialData();         
+    if (ImGui::Button("Очистить график")) { 
+        Clear_Plot_Data();      
     }
     //================================
 
@@ -88,4 +90,10 @@ void View_Group_5(void) {
 // Функция для расчета экспоненциального скользящего среднего (EMA)
 double CalculateEMA(double current_value, double previous_ema, double alpha) {
     return alpha * current_value + (1 - alpha) * previous_ema;
+}
+//==================================================================================
+
+void Clear_Plot_Data() {
+    y_coords.clear();
+    ClearSerialData();  
 }

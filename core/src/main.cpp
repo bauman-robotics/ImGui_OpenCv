@@ -1,5 +1,8 @@
 
 #include "main.h"
+#include "main_menu.h"
+#include "view_groups.h"
+#include "ini_file.h"
 //============================================================================
 
 void InitImGuiFrame() {
@@ -23,21 +26,23 @@ void RenderFrame(GLFWwindow* window) {
 
 int main(int, char**)
 {  
-    
-    GLFWwindow *window = nullptr;
-    GLuint texture;   
-    
-    //============================= 
-    #ifdef USE_OPENCV
-        cv::VideoCapture cap(0);
-        int init_result = Init_All_CV(cap, &texture, &window);
-    #else 
-        int init_result = Init_All(&window);
-    #endif 
+    Select_Mode(CTRL_MODE);
 
-    if (init_result == -1) {
+    GLFWwindow *window = nullptr;
+
+    //============================= 
+
+    if (Init_All(&window) == -1) {
         return -1;
     } 
+    //=============================
+
+    if (var.cv_mode) {
+        
+        if (Init_CV() == -1) {
+            return -1;
+        }
+    }      
     //=============================
 
     // Основной цикл
@@ -46,25 +51,49 @@ int main(int, char**)
         // Начало нового кадра ImGui
         InitImGuiFrame();
 
-        #ifndef USE_OPENCV  
-            // Отображение демонстрационного окна
-            ShowDemoWindow();
+        Menu_Item();
+        //====================
+        if (!var.cv_mode) {
+            Close_CV(); 
+        } else if (!var.Init_CV_done) {
+            if (Init_CV() == -1) {
+                return -1;
+            }
+        }
+        //====================
+        if (!var.com_port_mode) {
+            //CloseSerial();
+           
+        } else if (!var.init_serial_done) {
+            if (InitSerial() == -1) {
+                //return -1;
+                Select_Mode(CTRL_MODE);
+            } else {
+                var.init_serial_done = true;
+            }
+        }        
+        //====================
+        if (!var.cv_mode) {
+            // Отображение окна "Ctrl"
+            ShowCtrlWindow();
 
             // Ожидание событий вместо постоянного опроса
-            #ifdef USE_COM_PORT  
+            if (var.com_port_mode) { 
                 glfwPollEvents(); 
-            #else 
+            } else {
                 glfwWaitEvents();                 
-            #endif       
-        #else
+            }     
+        }
+        else {
             // Обрабатываем события
             glfwPollEvents();
 
-            int cv_result = Cv_Processing(cap, &texture);
+            int cv_result  = Cv_Processing();
+
             if (cv_result == -1) {
                 break;
             }
-        #endif 
+        }
 
         // Рендеринг
         RenderFrame(window); 
@@ -72,6 +101,16 @@ int main(int, char**)
         // Уменьшение частоты обновления
         //std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60 FPS
     }
+
+
+    // Сохранение состояния ImGui в файл
+    ImGui::SaveIniSettingsToDisk(var.io->IniFilename);
+
+    // Очистка ini-файла от неиспользуемых значений
+    CleanIniFile(var.io->IniFilename);
+
+    SaveCustomSettings(var.io->IniFilename);
+    SaveWindowPosition(window, var.io->IniFilename);
 
     // Очистка
     ImGui_ImplOpenGL3_Shutdown();
@@ -81,10 +120,9 @@ int main(int, char**)
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    #ifdef USE_COM_PORT
+    if (var.com_port_mode) {
         CloseSerial();
-    #endif 
-
+    }
+ 
     return 0;
 }
-

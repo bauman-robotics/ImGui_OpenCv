@@ -76,6 +76,7 @@
         "imgui.h": "c",
         "codecvt": "cpp",
         "bitset": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "unordered_set": "cpp"
     }
 }

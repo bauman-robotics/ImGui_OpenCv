@@ -4,8 +4,10 @@
 
 void LoadFonts()
 {
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault(); // Загрузка стандартного шрифта
+    //ImGuiIO& io = ImGui::GetIO();
+
+    var.io->Fonts->AddFontDefault(); // Загрузка стандартного шрифта
+    //io.Fonts->AddFontDefault(); // Загрузка стандартного шрифта
 
 
     // Проверка наличия файла шрифта
@@ -20,7 +22,8 @@ void LoadFonts()
     // ImFont* font = io.Fonts->AddFontFromFileTTF(font_path, 16.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
 
     // Загрузка шрифта с поддержкой кириллицы из встроенного массива байтов
-    ImFont* font = io.Fonts->AddFontFromMemoryTTF(Roboto_Italic_ttf, Roboto_Italic_ttf_len, 16.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
+    //ImFont* font = io.Fonts->AddFontFromMemoryTTF(Roboto_Italic_ttf, Roboto_Italic_ttf_len, 16.0f, NULL, io.Fonts->GetGlyphRangesCyrillic());
+    ImFont* font = var.io->Fonts->AddFontFromMemoryTTF(Roboto_Italic_ttf, Roboto_Italic_ttf_len, 16.0f, NULL, var.io->Fonts->GetGlyphRangesCyrillic());
 
     if (font == NULL)
     {
@@ -28,6 +31,6 @@ void LoadFonts()
     }
     else
     {
-        io.FontDefault = font; // Установка загруженного шрифта как шрифта по умолчанию
+        var.io->FontDefault = font; // Установка загруженного шрифта как шрифта по умолчанию
     }
 }

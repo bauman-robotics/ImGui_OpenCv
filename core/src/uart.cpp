@@ -1,5 +1,6 @@
 #include "main.h"
 #include "uart.h"
+#include "view_groups.h"
 //============================
 #include <iostream>
 #include <string>
@@ -33,11 +34,18 @@ double GetPacketsPerSecond();
 //====================================================================
 int InitSerial() {
 
-    serial_fd = OpenSerialPort("/dev/ttyACM0");
+    //serial_fd = OpenSerialPort("/dev/ttyACM0");
+
+    serial_fd = OpenSerialPort(var.com_port.name.c_str());  
+
     if (serial_fd < 0) {
         return -1;
     }
     Start_Serial_Thread();
+
+    Clear_Plot_Data();
+
+    var.init_serial_done = true;
     return 0;
 }
 //====================================================================
@@ -86,9 +94,9 @@ int OpenSerialPort(const char* device)
 }
 //====================================================================
 
-std::vector<int> parseComPortData() {
+std::vector<int> parseComPortData(const std::string& prefix) {
     std::vector<int> results;
-    std::regex pattern(R"(data (\d+))");
+    std::regex pattern(prefix + R"(\s+(\d+))");
 
     for (const auto& data : serial_data) {
         std::smatch match;
@@ -148,6 +156,7 @@ void CloseSerial() {
         serial_thread.join();
     }
     close(serial_fd);
+    var.init_serial_done = 0;
 }
 //================================================
 

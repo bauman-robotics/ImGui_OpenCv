@@ -2,7 +2,7 @@
 CXX = g++
 
 # Укажите флаги компиляции
-CXXFLAGS = -std=c++11 -I/usr/include/opencv4 -Iimgui -Ibackends -Icore/inc $(DEBUG_FLAGS)
+CXXFLAGS = -std=c++17 -I/usr/include/opencv4 -Iimgui -Ibackends -Icore/inc $(DEBUG_FLAGS)
 
 # Укажите флаги для отладки
 DEBUG_FLAGS = -g
