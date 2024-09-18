@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Camera Feed",
+            "name": "Launch imGui_test",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/camera_feed",
+            "program": "${workspaceFolder}/bin/imGui_test",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

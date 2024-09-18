@@ -25,9 +25,16 @@ typedef struct {
 typedef struct {  
     //==================     
     std::string name;
+    std::string last_port_name;
     std::string data_prefix;
     uint32_t i_baud_rate;
     //==================
+    std::vector<const char*> ports_list;
+    std::string selected_port;
+    int selected_port_index;
+    bool init_serial_done;
+    bool have_to_be_closed;
+    //==================    
 } com_port_s;
 //================================
 
@@ -38,7 +45,7 @@ typedef struct {
     //==================
     bool Init_CV_done;
     bool init_all_done;
-    bool init_serial_done;
+
     //==================    
     cv_ctrl cv;
     //==================

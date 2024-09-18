@@ -76,7 +76,7 @@ void Keys_Parser(std::string key, std::string value) {
     }
     //================================
     if (key == "Com-port") {
-        var.com_port.name = value;
+        var.com_port.last_port_name = value;
     }
     //================================   
     if (key == "data_prefix") {

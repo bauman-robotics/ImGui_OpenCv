@@ -30,7 +30,7 @@ BINDIR = bin
 OBJS = $(SRCS:%.cpp=$(OBJDIR)/%.o)
 
 # Укажите выходной файл
-TARGET = $(BINDIR)/camera_feed
+TARGET = $(BINDIR)/imGui_test
 
 # Правило по умолчанию для сборки
 all: $(OBJDIR) $(BINDIR) $(TARGET)

@@ -16,7 +16,7 @@ void View_Group_5(void) {
     //=== Пятая группа графиком данных из последовательного порта работающего в отдельном потоке =================
 
     
-    ImGui::BeginChild("Group 5", ImVec2(865, 270), true);
+    ImGui::BeginChild("Group 5", ImVec2(575, 270), true);
     ImGui::Text("Группа 5 - Данные из последовательного порта");
 
     // Парсинг данных
@@ -50,16 +50,27 @@ void View_Group_5(void) {
         ImGui::EndDisabled();
     }
 
+    // Получаем доступную ширину контента
+    ImVec2 available_size = ImGui::GetContentRegionAvail();
+
+        // Устанавливаем желаемую высоту графика
+    float plot_height = 150.0f;
+
+
     // Отображение графика
     if (graph_type == 0) {
-        ImGui::PlotLines("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
+        // Рисуем график, используя доступную ширину и заданную высоту
+        ImGui::PlotLines("Serial", y_coords.data(), static_cast<int>(y_coords.size()), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(available_size.x, plot_height));
+
+
+        //ImGui::PlotLines("Serial", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
     } else if (graph_type == 1) {
-        ImGui::PlotHistogram("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
+        ImGui::PlotHistogram("Serial", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
     } else if (graph_type == 2) {
         if (y_coords.size() > window_size) {
-            ImGui::PlotLines("Данные из ком-порта", &y_coords[y_coords.size() - window_size], window_size, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
+            ImGui::PlotLines("Serial", &y_coords[y_coords.size() - window_size], window_size, 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
         } else {
-            ImGui::PlotLines("Данные из ком-порта", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
+            ImGui::PlotLines("Serial", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
         }
     }
 

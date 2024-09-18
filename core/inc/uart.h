@@ -6,3 +6,4 @@ int InitSerial();
 void ClearSerialData(); 
 void CloseSerial();
 double GetPacketsPerSecond();
+std::vector<const char*> getConnectedTTYACMPorts();

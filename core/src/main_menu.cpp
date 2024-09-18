@@ -18,7 +18,9 @@ void Menu_Item(void) {
     ImGui::PushStyleColor(ImGuiCol_Button, var.com_port_mode ? activeColor : defaultColor);
     if (ImGui::Button("                         Com-port                           ")) {
 
-        Select_Mode(COM_PORT_MODE);       
+        Select_Mode(COM_PORT_MODE);  
+        InitSerial(); 
+        Close_CV();    
     }
     ImGui::PopStyleColor();
     ImGui::SameLine();
@@ -27,6 +29,8 @@ void Menu_Item(void) {
     if (ImGui::Button("                         Ctrl                             ")) {
         
         Select_Mode(CTRL_MODE);  
+        CloseSerial();
+        Close_CV();
     }
     ImGui::PopStyleColor();
     ImGui::SameLine();
@@ -35,6 +39,10 @@ void Menu_Item(void) {
     if (ImGui::Button("                         OpenCv                           ")) {
 
         Select_Mode(OPENCV_MODE); 
+        CloseSerial();
+        if (!var.Init_CV_done) {
+            Init_CV();
+        }
 
     }
     ImGui::PopStyleColor();

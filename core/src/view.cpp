@@ -38,8 +38,9 @@ void ShowCtrlWindow() {
     //=== Пятая группа с листбоксом данных из последовательного порта =================
     if (var.com_port_mode) {
         View_Group_5();
+        ImGui::SameLine();
+        View_Group_6();
     }
-
     // Конец окна
     ImGui::End();
 }

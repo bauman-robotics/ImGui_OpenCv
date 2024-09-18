@@ -21,7 +21,7 @@ int Init_All(GLFWwindow** window) {
 
     var.cv.playing = 1;
     var.Init_CV_done = 0;
-    var.init_serial_done = 0;
+    var.com_port.init_serial_done = 0;
 
     var.cv.frame_size = FRAME_SIZE_640;
 
@@ -82,7 +82,7 @@ int InitGLFWAndImGui(GLFWwindow** window) {
     }
 
     // Установить флаг для запрета изменения размера окна
-    //glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
    int win_width = 880;
 
@@ -111,8 +111,6 @@ int InitGLFWAndImGui(GLFWwindow** window) {
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(*window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
-
-
 
     return 0;
 }

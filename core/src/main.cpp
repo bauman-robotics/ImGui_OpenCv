@@ -53,24 +53,11 @@ int main(int, char**)
 
         Menu_Item();
         //====================
-        if (!var.cv_mode) {
-            Close_CV(); 
-        } else if (!var.Init_CV_done) {
-            if (Init_CV() == -1) {
-                return -1;
-            }
-        }
-        //====================
-        if (!var.com_port_mode) {
-            //CloseSerial();
-           
-        } else if (!var.init_serial_done) {
-            if (InitSerial() == -1) {
-                //return -1;
-                Select_Mode(CTRL_MODE);
-            } else {
-                var.init_serial_done = true;
-            }
+        if  ((var.com_port_mode)              &&
+             (!var.com_port.init_serial_done) &&
+             (!var.com_port.have_to_be_closed)) {
+            
+            InitSerial();
         }        
         //====================
         if (!var.cv_mode) {
@@ -101,7 +88,6 @@ int main(int, char**)
         // Уменьшение частоты обновления
         //std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60 FPS
     }
-
 
     // Сохранение состояния ImGui в файл
     ImGui::SaveIniSettingsToDisk(var.io->IniFilename);
