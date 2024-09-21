@@ -52,7 +52,6 @@ void ReadSocketData();
 void UpdateSocketPacketsPerSecond();
 void UpdateSocketValDataPerSecond();
 int Socket_Close();
-void ClearSocketData();
 double GetPacketsPerSecond_S();
 double Get_Val_Data_PerSecond_S();
 
@@ -200,8 +199,6 @@ void ReadSocketData() {
             std::cerr << "Ошибка чтения socket" << std::endl;
             break;
         }
-
-
     }
 }
 //====================================================================
@@ -277,12 +274,6 @@ int Socket_Stop_Read() {
     keep_running = false;
 
     return 0;   
-}
-//================================================
-
-void ClearSocketData() {
-    std::lock_guard<std::mutex> lock(data_mutex);
-    socket_data.clear();
 }
 //================================================
 

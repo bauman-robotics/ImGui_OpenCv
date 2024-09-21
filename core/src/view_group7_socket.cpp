@@ -8,10 +8,9 @@ static std::atomic<double> smoothed_packets_per_second(0.0);
 static std::atomic<double> smoothed_val_data_per_second(0.0);
 static std::vector<float> y_coords;
 
+static std::mutex data_mutex;
 
 double CalculateEMA_Socet(double current_value, double previous_ema, double alpha);
-double CalculateEMA_Socet_v(double current_value, double previous_ema, double alpha);
-void Clear_Plot_Socket_Data();
 
 //======================================
 
@@ -85,7 +84,9 @@ void View_Group_7(void) {
 
     // Кнопка для очистки графика
     if (ImGui::Button("Очистить график")) { 
-        Clear_Plot_Socket_Data();      
+        std::lock_guard<std::mutex> lock(data_mutex);
+        parsed_data.clear();    
+        y_coords.clear();
     }
     //================================
 
@@ -104,7 +105,7 @@ void View_Group_7(void) {
 
     //============  Количество значений в секунду =======
     double current_val_data_per_second = Get_Val_Data_PerSecond_S(); //parsed_data.size();//
-    smoothed_val_data_per_second.store(CalculateEMA_Socet_v(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
+    smoothed_val_data_per_second.store(CalculateEMA_Socet(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
     // Использование stringstream для форматирования строки
     std::stringstream ss1;
     ss1 << std::fixed << std::setprecision(2) << "Значений в секунду: " << std::setw(6) << smoothed_val_data_per_second.load();
@@ -122,14 +123,4 @@ double CalculateEMA_Socet(double current_value, double previous_ema, double alph
 }
 //==================================================================================
 
-// Функция для расчета экспоненциального скользящего среднего (EMA)
-double CalculateEMA_Socet_v(double current_value, double previous_ema, double alpha) {
-    return alpha * current_value + (1 - alpha) * previous_ema;
-}
-//==================================================================================
 
-
-void Clear_Plot_Socket_Data() {
-    y_coords.clear();
-    ClearSocketData();
-}
