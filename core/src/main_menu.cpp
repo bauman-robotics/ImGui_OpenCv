@@ -26,7 +26,7 @@ void Menu_Item(void) {
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, var.ctrl_mode ? activeColor : defaultColor);
-    if (ImGui::Button("                         Ctrl                             ")) {
+    if (ImGui::Button("                      Socket-Server                         ")) {
         
         Select_Mode(CTRL_MODE);  
         CloseSerial();

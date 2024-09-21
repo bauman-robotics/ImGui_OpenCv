@@ -37,6 +37,16 @@ typedef struct {
     //==================    
 } com_port_s;
 //================================
+typedef struct {  
+    //==================     
+    std::string data_prefix;
+    //==================
+    int port;
+    bool init_socket_done;
+    bool have_to_be_closed;
+    //==================    
+} socket_s;
+//================================
 
 typedef struct {   
     bool cv_mode;
@@ -52,6 +62,7 @@ typedef struct {
     char iniFileName[255];
     ImGuiIO* io;
     com_port_s com_port;
+    socket_s socket;
 
 } variables;
 

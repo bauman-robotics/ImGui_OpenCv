@@ -7,3 +7,6 @@
 #define FRAME_SIZE_MIN (0)
 #define FRAME_SIZE_640 (1)
 #define FRAME_SIZE_MAX (2)
+
+
+#define SERVER_SOCKET_PORT (8082)

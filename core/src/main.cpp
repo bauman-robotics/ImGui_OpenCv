@@ -3,6 +3,8 @@
 #include "main_menu.h"
 #include "view_groups.h"
 #include "ini_file.h"
+#include "tcp-Server.h"
+
 //============================================================================
 
 void InitImGuiFrame() {
@@ -65,11 +67,13 @@ int main(int, char**)
             ShowCtrlWindow();
 
             // Ожидание событий вместо постоянного опроса
-            if (var.com_port_mode) { 
-                glfwPollEvents(); 
-            } else {
-                glfwWaitEvents();                 
-            }     
+            // if (var.com_port_mode) { 
+            //     glfwPollEvents(); 
+            // } else {
+            //     glfwWaitEvents();                 
+            // }     
+
+            glfwPollEvents(); 
         }
         else {
             // Обрабатываем события
@@ -108,6 +112,11 @@ int main(int, char**)
 
     if (var.com_port_mode) {
         CloseSerial();
+    }
+
+    if (var.socket.init_socket_done) {
+
+        Socket_Close();
     }
  
     return 0;

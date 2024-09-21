@@ -18,8 +18,8 @@
 #include <condition_variable>
 #include <chrono>
 
-std::mutex mtx;
-std::mutex data_mutex;
+// static std::mutex mtx;
+static std::mutex data_mutex;
 
 std::atomic<bool> keep_running;
 static int serial_fd = 0;
@@ -32,9 +32,11 @@ std::atomic<int> packets_per_second(0);
 int OpenSerialPort(const char* device);
 void ReadSerialData();
 void Start_Serial_Thread();
+void Stop_Serial_Thread(); // Функция для остановки потока
 void UpdatePacketsPerSecond();
 double GetPacketsPerSecond();
-
+std::vector<int> parseComPortData(const std::string& prefix);
+ 
 int FindStringIndex(const std::vector<const char*>& list, const std::string& target);
 
 //====================================================================
@@ -70,7 +72,7 @@ int InitSerial() {
     }
     Start_Serial_Thread();
 
-    Clear_Plot_Data();
+    Clear_Plot_Serial_Data();
 
     keep_running = true;
     var.com_port.init_serial_done = true;

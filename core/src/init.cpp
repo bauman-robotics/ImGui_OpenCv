@@ -31,6 +31,8 @@ int Init_All(GLFWwindow** window) {
 
     var.com_port.i_baud_rate = 115200;
     
+    var.socket.port = SERVER_SOCKET_PORT;
+
     LoadCustomSettings(var.io->IniFilename);
 
     if (var.com_port_mode) {
