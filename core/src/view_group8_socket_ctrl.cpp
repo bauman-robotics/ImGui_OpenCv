@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include <tcp-Server.h>
+#include <view_groups.h>
 //======================================
 
 
@@ -20,31 +21,10 @@ void View_Group_8(void) {
 
     ImGui::BeginChild("Group 8", ImVec2(280, 270), true);
 
-    // // Установка ширины комбобокса
-    // ImGui::SetNextItemWidth(150.0f); // Установите желаемую ширину комбобокса
-
-    // // Отображение комбобокса с портами
-    // if (!var.com_port.ports_list.empty()) {
-    //     ImGui::Combo("Порт", &combo_current_item, var.com_port.ports_list.data(), var.com_port.ports_list.size());
-    //     // Сохранение выбранного элемента в переменную
-    //     var.com_port.selected_port = var.com_port.ports_list[combo_current_item];
-    
-    // } else {
-    //     ImGui::Text("Нет портов");
-    //     var.com_port.selected_port = "-1";
-    // }
-
-    static char buf_port[80] = {0};
-    ImGui::Text("Socket port = %d", var.socket.port);
+    ImGui::Text("Socket port");
+    ImGui::InputInt("##", &var.socket.port);
 
     //========================================
-
-    // if (ImGui::Button("    Review    ")) {
-    //     var.com_port.ports_list = getConnectedTTYACMPorts();
-    // }
-
-    //========================================
-    //ImGui::SameLine();
 
     // Цвета для подсвечивания выбранной кнопки
     ImVec4 activeColor = ImVec4(0.0f, 0.5f, 1.0f, 1.0f); // Цвет для активной кнопки
@@ -52,20 +32,23 @@ void View_Group_8(void) {
 
     ImGui::PushStyleColor(ImGuiCol_Button, var.socket.init_socket_done ? activeColor : defaultColor);
 
-    if (ImGui::Button("        Open        ")) {
-
+    if (ImGui::Button("       Open       ")) {
+        Clear_Socket_Data();
         Socket_Server_Init(var.socket.port);
         
     }
     ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+
     //========================================
-    if (ImGui::Button("                    Close                     ")) {
+    if (ImGui::Button("       Close       ")) {
         if (var.socket.init_socket_done) {
             Socket_Close();
-            //Socket_Stop_Read();
         }
     }
     //========================================
+ 
     ImGui::EndChild();
 }
 //==================================================================================

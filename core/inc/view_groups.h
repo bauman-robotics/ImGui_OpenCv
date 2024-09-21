@@ -14,3 +14,4 @@ int View_Cv_Group_1(cv::VideoCapture & cap);
 void View_Cv_Group_2();
 
 void Clear_Plot_Serial_Data(); 
+void Clear_Socket_Data();

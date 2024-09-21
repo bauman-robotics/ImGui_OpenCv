@@ -9,9 +9,10 @@ static std::atomic<double> smoothed_val_data_per_second(0.0);
 static std::vector<float> y_coords;
 
 static std::mutex data_mutex;
+static std::vector<int> parsed_data;   
 
 double CalculateEMA_Socet(double current_value, double previous_ema, double alpha);
-
+void Clear_Socket_Data();
 //======================================
 
 void View_Group_7(void) {    
@@ -21,8 +22,6 @@ void View_Group_7(void) {
     ImGui::BeginChild("Group 7", ImVec2(575, 270), true);
     ImGui::Text("Группа 7 - Данные из Socket");
 
-    //std::vector<int> parsed_data;
-    static std::vector<int> parsed_data;   
     std::vector<int> new_parser_data;
     // Парсинг данных
     if (var.socket.init_socket_done) {
@@ -84,9 +83,7 @@ void View_Group_7(void) {
 
     // Кнопка для очистки графика
     if (ImGui::Button("Очистить график")) { 
-        std::lock_guard<std::mutex> lock(data_mutex);
-        parsed_data.clear();    
-        y_coords.clear();
+        Clear_Socket_Data();
     }
     //================================
 
@@ -124,3 +121,8 @@ double CalculateEMA_Socet(double current_value, double previous_ema, double alph
 //==================================================================================
 
 
+void Clear_Socket_Data() {
+    std::lock_guard<std::mutex> lock(data_mutex);
+    parsed_data.clear();    
+    y_coords.clear();
+}
