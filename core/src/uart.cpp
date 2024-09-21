@@ -18,23 +18,36 @@
 #include <condition_variable>
 #include <chrono>
 
-// static std::mutex mtx;
-static std::mutex data_mutex;
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
 
 std::atomic<bool> keep_running;
-static int serial_fd = 0;
-std::thread serial_thread;
-std::condition_variable cvar;
-static std::vector<std::string> serial_data;
 static std::atomic<int> packet_count(0);
 std::atomic<int> packets_per_second(0);
+
+static std::atomic<int> val_data_count(0);
+static std::atomic<int> val_data_per_second(0);
+
+std::thread serial_thread;
+static std::mutex data_mutex;
+
+static std::vector<std::string> serial_data;
+
+static int serial_fd = 0;
+std::condition_variable cvar;
 
 int OpenSerialPort(const char* device);
 void ReadSerialData();
 void Start_Serial_Thread();
 void Stop_Serial_Thread(); // Функция для остановки потока
 void UpdatePacketsPerSecond();
+void UpdateValDataPerSecond();
+
 double GetPacketsPerSecond();
+double Get_Val_Data_PerSecond();
+ 
 std::vector<int> parseComPortData(const std::string& prefix);
  
 int FindStringIndex(const std::vector<const char*>& list, const std::string& target);
@@ -126,24 +139,64 @@ int OpenSerialPort(const char* device)
 }
 //====================================================================
 
+// std::vector<int> parseComPortData(const std::string& prefix) {
+//     std::vector<int> results;
+//     std::regex pattern(prefix + R"(\s+(\d+))");
+//     std::cout << "parseComPortData" << std::endl;
+//     for (const auto& data : serial_data) {
+//         std::smatch match;
+//         if (std::regex_search(data, match, pattern)) {
+//             results.push_back(std::stoi(match[1].str()));
+//             std::cout << "push_back" << std::stoi(match[1].str()) << std::endl;
+//         }
+//     }
+
+//     return results;
+// }
+
 std::vector<int> parseComPortData(const std::string& prefix) {
     std::vector<int> results;
-    std::regex pattern(prefix + R"(\s+(\d+))");
+    std::regex pattern(prefix + R"(\s+(\d+)*)");
 
-    for (const auto& data : serial_data) {
-        std::smatch match;
-        if (std::regex_search(data, match, pattern)) {
-            results.push_back(std::stoi(match[1].str()));
+    std::vector<std::string> serial_data_buf;
+    std::lock_guard<std::mutex> lock(data_mutex); // Защита чтения
+    serial_data_buf = std::move(serial_data);
+ 
+    for (const auto& data : serial_data_buf) {
+        #ifdef DEBUG_COUT
+            std::cout << "data = " << data << "\n";
+        #endif 
+        //==================
+        auto begin = std::sregex_iterator(data.begin(), data.end(), pattern);
+        auto end = std::sregex_iterator();
+    
+        // Поиск всех вхождений префекса данных
+        for(auto i = begin; i != end; ++i)  {
+            std::smatch match = *i;
+            string prefix_str = match.str();
+            #ifdef DEBUG_COUT
+                std::cout << "prefix_str = " << prefix_str << std::endl;
+            #endif 
+            // Вытаскиваем значение из каждой подстроки с префиксом.
+            std::smatch match_1_val;
+            if (std::regex_search(prefix_str, match_1_val, pattern)) {
+                #ifdef DEBUG_COUT
+                    std::cout << "results =" << std::stoi(match_1_val[1].str()) << "\n";    
+                #endif      
+                try {    
+                    results.push_back(std::stoi(match_1_val[1].str())); 
+                }  
+                catch(...) {
+                    std::cout << "stoi(match_1_val[1].str() Err "  << "\n"; 
+                }    
+                val_data_count++; 
+                #ifdef DEBUG_COUT     
+                    std::cout << "val_data_count = " << val_data_count << std::endl;  
+                #endif      
+            }
         }
     }
-
     return results;
-}
-//================================================
-
-void ClearSerialData() {
-    std::lock_guard<std::mutex> lock(data_mutex);
-    serial_data.clear();
 }
 //================================================
 
@@ -165,6 +218,13 @@ double GetPacketsPerSecond() {
 }
 //================================================
 
+double Get_Val_Data_PerSecond() {
+    
+    return val_data_per_second;
+}
+//================================================
+
+
 void UpdatePacketsPerSecond() {
     static int last_count = 0;
     int current_count = packet_count.load();
@@ -174,6 +234,17 @@ void UpdatePacketsPerSecond() {
     packets_per_second.store(packets_this_second);
 }
 //================================================
+
+void UpdateValDataPerSecond() {
+    static int last_count = 0;
+    int current_count = val_data_count.load();
+    int val_data_this_second = current_count - last_count;
+    last_count = current_count;
+
+    val_data_per_second.store(val_data_this_second);
+}
+//================================================
+
 
 // Функция для получения списка подключенных портов ttyACM
 std::vector<const char*> getConnectedTTYACMPorts() {
@@ -207,8 +278,10 @@ void Start_Serial_Thread() {
         while (keep_running) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             UpdatePacketsPerSecond();
+            UpdateValDataPerSecond();
         }
         packets_per_second.store(0);
+        val_data_per_second.store(0);
     }).detach();
 }
 //================================================
@@ -249,6 +322,9 @@ void ReadSerialData() {
         // Чтение данных из COM-порта
         int n = read(serial_fd, buf, sizeof(buf) - 1);
         if (n > 0) {
+            #ifdef DEBUG_COUT
+                std::cout << "___________________________new_Packet" << std::endl;
+            #endif 
             buf[n] = '\0';
             std::string line(buf);
             std::lock_guard<std::mutex> data_lock(data_mutex);

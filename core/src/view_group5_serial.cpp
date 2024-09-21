@@ -4,7 +4,11 @@
 
 
 static std::atomic<double> smoothed_packets_per_second(0.0);
+static std::atomic<double> smoothed_val_data_per_second(0.0);
 static std::vector<float> y_coords;
+
+static std::mutex data_mutex;
+static std::vector<int> parsed_data;
 
 double CalculateEMA(double current_value, double previous_ema, double alpha);
 void Clear_Plot_Serial_Data();
@@ -19,10 +23,15 @@ void View_Group_5(void) {
     ImGui::BeginChild("Group 5", ImVec2(575, 270), true);
     ImGui::Text("Группа 5 - Данные из последовательного порта");
 
+    std::vector<int> new_parser_data;
     // Парсинг данных
+      if (var.com_port.init_serial_done) {
+        new_parser_data = parseComPortData("data");
 
-    std::vector<int> parsed_data = parseComPortData("data");
-
+        parsed_data.insert(parsed_data.end(),
+                new_parser_data.begin(),
+                new_parser_data.end());
+    }
     //====  График значений ===========
 
     // Преобразование данных в формат для ImGui::PlotLines
@@ -93,6 +102,15 @@ void View_Group_5(void) {
     ss << std::fixed << std::setprecision(2) << "Пакетов в секунду: " << std::setw(6) << smoothed_packets_per_second.load();
     ImGui::Text("%s", ss.str().c_str());
 
+    //============  Количество значений в секунду =======
+    double current_val_data_per_second = Get_Val_Data_PerSecond(); //parsed_data.size();//
+    smoothed_val_data_per_second.store(CalculateEMA(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
+    // Использование stringstream для форматирования строки
+    std::stringstream ss1;
+    ss1 << std::fixed << std::setprecision(2) << "Значений в секунду: " << std::setw(6) << smoothed_val_data_per_second.load();
+    ImGui::Text("%s", ss1.str().c_str());
+
+    //======================================================
 
     ImGui::EndChild();
 }
@@ -105,6 +123,6 @@ double CalculateEMA(double current_value, double previous_ema, double alpha) {
 //==================================================================================
 
 void Clear_Plot_Serial_Data() {
-    y_coords.clear();
-    ClearSerialData();  
+    parsed_data.clear(); 
+    y_coords.clear();   
 }

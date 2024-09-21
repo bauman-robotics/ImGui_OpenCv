@@ -7,7 +7,6 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <netdb.h>
 #include <sys/uio.h>
 #include <sys/time.h>
@@ -32,10 +31,9 @@ static std::atomic<int> val_data_count(0);
 static std::atomic<int> val_data_per_second(0);
 
 static std::thread socket_thread;
+static std::mutex data_mutex;
 
 static std::vector<std::string> socket_data;
-
-static std::mutex data_mutex;
 
 static char msg[1600];
 static int newSd;
@@ -232,8 +230,13 @@ std::vector<int> parseSocketData(const std::string& prefix) {
             if (std::regex_search(prefix_str, match_1_val, pattern)) {
                 #ifdef DEBUG_COUT
                     std::cout << "results =" << std::stoi(match_1_val[1].str()) << "\n";    
-                #endif      
-                results.push_back(std::stoi(match_1_val[1].str()));         
+                #endif  
+                try {    
+                    results.push_back(std::stoi(match_1_val[1].str())); 
+                }  
+                catch(...) {
+                    std::cout << "stoi(match_1_val[1].str() Err "  << "\n"; 
+                }      
                 val_data_count++; 
                 #ifdef DEBUG_COUT     
                     std::cout << "val_data_count = " << val_data_count << std::endl;  
