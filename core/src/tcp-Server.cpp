@@ -20,19 +20,24 @@
 
 #include "variables.h"
 #include <regex>
+// #include <boost/regex/escaped_string.hpp>
 
 using namespace std;
 
 static std::atomic<bool> keep_running(0);
 static std::atomic<int> packet_count(0);
 static std::atomic<int> packets_per_second(0);
+
+static std::atomic<int> val_data_count(0);
+static std::atomic<int> val_data_per_second(0);
+
 static std::thread socket_thread;
 
 static std::vector<std::string> socket_data;
 
 static std::mutex data_mutex;
 
-static char msg[1500];
+static char msg[1600];
 static int newSd;
 static int serverSd = 0;
 static int bytesRead = 0;
@@ -45,8 +50,13 @@ void Start_Server_Thread();
 void Stop_Socket_Thread(); 
 void ReadSocketData();
 void UpdateSocketPacketsPerSecond();
+void UpdateSocketValDataPerSecond();
 int Socket_Close();
 void ClearSocketData();
+double GetPacketsPerSecond_S();
+double Get_Val_Data_PerSecond_S();
+
+
 //================================================
 
 int Socket_Server_Init(int port) {
@@ -120,8 +130,10 @@ void Start_Server_Thread() {
         while (keep_running) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
             UpdateSocketPacketsPerSecond();
+            UpdateSocketValDataPerSecond();
         }
         packets_per_second.store(0);
+        val_data_per_second.store(0);
     }).detach();
 }
 //================================================
@@ -154,7 +166,10 @@ void ReadSocketData() {
             break;
         }
         //cout << "Client: " << msg << endl;
-        cout <<  msg << endl;
+
+        #ifdef DEBUG_COUT
+            cout <<  msg << endl;
+        #endif
         //cout << ">";
         //string data;
         //getline(cin, data);
@@ -175,9 +190,11 @@ void ReadSocketData() {
             std::lock_guard<std::mutex> data_lock(data_mutex);
             socket_data.push_back(line);
             packet_count++;
-
+            #ifdef DEBUG_COUT
+                std::cout << "packet_count____________________________________" << packet_count << std::endl;
+            #endif 
             //send the message to client
-            bytesWritten += send(newSd, (char*)&msg, strlen(msg), 0);
+            //bytesWritten += send(newSd, (char*)&msg, strlen(msg), 0);
 
         } else if (n < 0) {
             std::cerr << "Ошибка чтения socket" << std::endl;
@@ -190,16 +207,43 @@ void ReadSocketData() {
 //====================================================================
 
 std::vector<int> parseSocketData(const std::string& prefix) {
-    std::vector<int> results;
-    std::regex pattern(prefix + R"(\s+(\d+))");
 
-    for (const auto& data : socket_data) {
-        std::smatch match;
-        if (std::regex_search(data, match, pattern)) {
-            results.push_back(std::stoi(match[1].str()));
+    std::vector<int> results;
+    std::regex pattern(prefix + R"(\s+(\d+)*)");
+
+    std::vector<std::string> socket_data_buf;
+    std::lock_guard<std::mutex> lock(data_mutex); // Защита чтения
+    socket_data_buf = std::move(socket_data);
+ 
+    for (const auto& data : socket_data_buf) {
+        #ifdef DEBUG_COUT
+            std::cout << "data = " << data << "\n";
+        #endif 
+        //==================
+        auto begin = std::sregex_iterator(data.begin(), data.end(), pattern);
+        auto end = std::sregex_iterator();
+    
+        // Поиск всех вхождений префекса данных
+        for(auto i = begin; i != end; ++i)  {
+            std::smatch match = *i;
+            string prefix_str = match.str();
+            #ifdef DEBUG_COUT
+                std::cout << "prefix_str = " << prefix_str << std::endl;
+            #endif 
+            // Вытаскиваем значение из каждой подстроки с префиксом.
+            std::smatch match_1_val;
+            if (std::regex_search(prefix_str, match_1_val, pattern)) {
+                #ifdef DEBUG_COUT
+                    std::cout << "results =" << std::stoi(match_1_val[1].str()) << "\n";    
+                #endif      
+                results.push_back(std::stoi(match_1_val[1].str()));         
+                val_data_count++; 
+                #ifdef DEBUG_COUT     
+                    std::cout << "val_data_count = " << val_data_count << std::endl;  
+                #endif      
+            }
         }
     }
-
     return results;
 }
 //================================================
@@ -211,6 +255,17 @@ void UpdateSocketPacketsPerSecond() {
     last_count = current_count;
 
     packets_per_second.store(packets_this_second);
+}
+
+//================================================
+
+void UpdateSocketValDataPerSecond() {
+    static int last_count = 0;
+    int current_count = val_data_count.load();
+    int val_data_this_second = current_count - last_count;
+    last_count = current_count;
+
+    val_data_per_second.store(val_data_this_second);
 }
 //================================================
 
@@ -253,4 +308,10 @@ int Socket_Close() {
 double GetPacketsPerSecond_S() {
     
     return packets_per_second;
+}
+//================================================
+
+double Get_Val_Data_PerSecond_S() {
+    
+    return val_data_per_second;
 }

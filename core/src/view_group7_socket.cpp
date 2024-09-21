@@ -5,9 +5,12 @@
 
 
 static std::atomic<double> smoothed_packets_per_second(0.0);
+static std::atomic<double> smoothed_val_data_per_second(0.0);
 static std::vector<float> y_coords;
 
+
 double CalculateEMA_Socet(double current_value, double previous_ema, double alpha);
+double CalculateEMA_Socet_v(double current_value, double previous_ema, double alpha);
 void Clear_Plot_Socket_Data();
 
 //======================================
@@ -19,10 +22,18 @@ void View_Group_7(void) {
     ImGui::BeginChild("Group 7", ImVec2(575, 270), true);
     ImGui::Text("Группа 7 - Данные из Socket");
 
+    //std::vector<int> parsed_data;
+    static std::vector<int> parsed_data;   
+    std::vector<int> new_parser_data;
     // Парсинг данных
+    if (var.socket.init_socket_done) {
+        new_parser_data = parseSocketData("data");
 
-    std::vector<int> parsed_data = parseSocketData("data");
+        parsed_data.insert(parsed_data.end(),
+                new_parser_data.begin(),
+                new_parser_data.end());
 
+    }
     //====  График значений ===========
 
     // Преобразование данных в формат для ImGui::PlotLines
@@ -62,7 +73,6 @@ void View_Group_7(void) {
         // Рисуем график, используя доступную ширину и заданную высоту
         ImGui::PlotLines("Socket", y_coords.data(), static_cast<int>(y_coords.size()), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(available_size.x, plot_height));
 
-        //ImGui::PlotLines("Serial", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(0, 150));
     } else if (graph_type == 1) {
         ImGui::PlotHistogram("Socket", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
     } else if (graph_type == 2) {
@@ -92,6 +102,15 @@ void View_Group_7(void) {
     ss << std::fixed << std::setprecision(2) << "Пакетов в секунду: " << std::setw(6) << smoothed_packets_per_second.load();
     ImGui::Text("%s", ss.str().c_str());
 
+    //============  Количество значений в секунду =======
+    double current_val_data_per_second = Get_Val_Data_PerSecond_S(); //parsed_data.size();//
+    smoothed_val_data_per_second.store(CalculateEMA_Socet_v(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
+    // Использование stringstream для форматирования строки
+    std::stringstream ss1;
+    ss1 << std::fixed << std::setprecision(2) << "Значений в секунду: " << std::setw(6) << smoothed_val_data_per_second.load();
+    ImGui::Text("%s", ss1.str().c_str());
+
+    //======================================================
 
     ImGui::EndChild();
 }
@@ -102,6 +121,13 @@ double CalculateEMA_Socet(double current_value, double previous_ema, double alph
     return alpha * current_value + (1 - alpha) * previous_ema;
 }
 //==================================================================================
+
+// Функция для расчета экспоненциального скользящего среднего (EMA)
+double CalculateEMA_Socet_v(double current_value, double previous_ema, double alpha) {
+    return alpha * current_value + (1 - alpha) * previous_ema;
+}
+//==================================================================================
+
 
 void Clear_Plot_Socket_Data() {
     y_coords.clear();
