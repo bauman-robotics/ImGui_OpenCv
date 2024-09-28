@@ -116,10 +116,10 @@ I (6809) esp32: data 468
 
 ### Сборка
 
-sudo apt-get update
-sudo apt-get install libglfw3-dev
-sudo apt-get install libopencv-dev
-sudo apt-get install libglew-dev
+- sudo apt-get update
+- sudo apt-get install libglfw3-dev
+- sudo apt-get install libopencv-dev
+- sudo apt-get install libglew-dev
 
 1. Клонируйте репозиторий:
 
