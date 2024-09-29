@@ -7,6 +7,7 @@
 //==================
 #include <opencv2/opencv.hpp>
 //============================
+#include <atomic>
 
 typedef struct {  
     //==================     
@@ -39,6 +40,13 @@ typedef struct {
 //================================
 typedef struct {  
     //==================     
+    char message[10];
+    std::atomic<bool> need_to_be_sended;  
+    //==================    
+} socket_send;
+//================================
+typedef struct {  
+    //==================     
     std::string data_prefix;
     //==================
     int port;
@@ -47,6 +55,7 @@ typedef struct {
     bool have_to_be_binded;    
     //bool have_to_be_open;    
     //==================    
+    socket_send send;
 } socket_s;
 //================================
 
