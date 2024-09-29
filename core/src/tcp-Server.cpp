@@ -283,6 +283,7 @@ void ReadSocketData() {
                 if (var.socket.send.need_to_be_sended.load() == 1) {
                     var.socket.send.need_to_be_sended.store(0);
                     send(newSd, var.socket.send.message, strlen(var.socket.send.message), 0);
+                    cout << "send to Client: " << var.socket.send.message << endl;
                 }
 
                 // Чтение данных
