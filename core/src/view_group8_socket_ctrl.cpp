@@ -52,6 +52,22 @@ void View_Group_8(void) {
         }
     }
     //========================================
+    ImGui::PushStyleColor(ImGuiCol_Button, var.log.log_Is_Started ? activeColor : defaultColor);
+
+    if (ImGui::Button("  Start Save   ")) {
+        Create_Log_File();
+        //var.log.log_Is_Started = 1;
+        
+    }
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+
+    //========================================
+  
+    if (ImGui::Button("   Stop Save    ")) {
+        var.log.log_Is_Started = 0;
+    }
  
     ImGui::EndChild();
 }

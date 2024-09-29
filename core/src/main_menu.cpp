@@ -1,4 +1,4 @@
-    #include "main.h"
+#include "main.h"
     
 void Menu_Item(void) {
     // Установка позиции и размера окна

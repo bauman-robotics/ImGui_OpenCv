@@ -20,6 +20,7 @@
 #include "variables.h"
 #include <regex>
 #include <chrono>
+#include "log_file.h"
 
 using namespace std;
 
@@ -285,6 +286,10 @@ void ReadSocketData() {
                     msg[n] = '\0';
                     std::string line(msg);
                     std::lock_guard<std::mutex> data_lock(data_mutex);
+
+                    if (var.log.log_Is_Started) {
+                        Add_Str_To_Log_File((uint8_t *)&msg, 0);
+                    }
                     socket_data.push_back(line);
                     packet_count++;
                     #ifdef DEBUG_COUT

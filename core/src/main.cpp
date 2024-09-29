@@ -49,6 +49,7 @@ int main(int, char**)
     //=============================
 
     Get_CPU_Load_Init(); 
+    //Create_Log_File();
 
     // Основной цикл
     while (!glfwWindowShouldClose(window))

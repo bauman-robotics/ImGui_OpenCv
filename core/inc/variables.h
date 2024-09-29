@@ -50,6 +50,14 @@ typedef struct {
 } socket_s;
 //================================
 
+typedef struct {
+    std::string curr_Log_File_Name;
+    bool    log_Is_Started;
+    std::string currentFolderName;
+    std::string strFullFileName;
+} Log_File_Type;
+//================================
+
 typedef struct {   
     bool cv_mode;
     bool ctrl_mode;
@@ -67,6 +75,8 @@ typedef struct {
     socket_s socket;
     //==================    
     double cpu_load;
+    //==================
+    Log_File_Type log;
 
 } variables;
 
