@@ -35,6 +35,8 @@ void View_Group_8(void) {
     if (ImGui::Button("       Open       ")) {
         Clear_Socket_Data();
         Socket_Server_Init(var.socket.port);
+
+        //var.socket.have_to_be_open = 1;
         
     }
     ImGui::PopStyleColor();
@@ -45,6 +47,8 @@ void View_Group_8(void) {
     if (ImGui::Button("       Close       ")) {
         if (var.socket.init_socket_done) {
             Socket_Close();
+
+            //var.socket.have_to_be_open = 0;
         }
     }
     //========================================

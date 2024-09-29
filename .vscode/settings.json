@@ -78,6 +78,7 @@
         "bitset": "cpp",
         "regex": "cpp",
         "unordered_set": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "__nullptr": "cpp"
     }
 }

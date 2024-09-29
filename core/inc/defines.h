@@ -9,6 +9,6 @@
 #define FRAME_SIZE_MAX (2)
 
 
-#define SERVER_SOCKET_PORT (8082)
+#define SERVER_SOCKET_PORT (18082)
 
 //#define DEBUG_COUT 

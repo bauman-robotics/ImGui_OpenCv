@@ -44,6 +44,8 @@ typedef struct {
     int port;
     bool init_socket_done;
     bool have_to_be_closed;
+    bool have_to_be_binded;    
+    //bool have_to_be_open;    
     //==================    
 } socket_s;
 //================================

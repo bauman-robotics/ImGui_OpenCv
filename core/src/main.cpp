@@ -89,6 +89,8 @@ int main(int, char**)
         // Рендеринг
         RenderFrame(window); 
 
+        Check_Socket_Connect(); 
+
         // Уменьшение частоты обновления
         //std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60 FPS
     }
