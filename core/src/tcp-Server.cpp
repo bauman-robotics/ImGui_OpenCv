@@ -262,7 +262,7 @@ void ReadSocketData() {
                 }
 
 
-                cout << "Client: " << msg << endl;
+                //cout << "Client: " << msg << endl;
 
                 #ifdef DEBUG_COUT
                     cout <<  msg << endl;

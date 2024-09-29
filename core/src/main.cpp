@@ -4,6 +4,7 @@
 #include "view_groups.h"
 #include "ini_file.h"
 #include "tcp-Server.h"
+#include "cpu_usage.h"
 
 //============================================================================
 
@@ -47,6 +48,8 @@ int main(int, char**)
     }      
     //=============================
 
+    Get_CPU_Load_Init(); 
+
     // Основной цикл
     while (!glfwWindowShouldClose(window))
     {
@@ -73,7 +76,7 @@ int main(int, char**)
             //     glfwWaitEvents();                 
             // }     
 
-            glfwPollEvents(); 
+            glfwPollEvents();             
         }
         else {
             // Обрабатываем события
@@ -92,7 +95,8 @@ int main(int, char**)
         Check_Socket_Connect(); 
 
         // Уменьшение частоты обновления
-        //std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60 FPS
+        std::this_thread::sleep_for(std::chrono::milliseconds(16)); // ~60 FPS
+        //std::this_thread::sleep_for(std::chrono::milliseconds(136)); // ~xx FPS        
     }
 
     // Сохранение состояния ImGui в файл
@@ -120,6 +124,8 @@ int main(int, char**)
 
         Socket_Close();
     }
- 
+    
+    Get_CPU_Load_DeInit();
+
     return 0;
 }

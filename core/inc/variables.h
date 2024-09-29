@@ -65,6 +65,8 @@ typedef struct {
     ImGuiIO* io;
     com_port_s com_port;
     socket_s socket;
+    //==================    
+    double cpu_load;
 
 } variables;
 

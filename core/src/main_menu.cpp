@@ -43,9 +43,16 @@ void Menu_Item(void) {
         if (!var.Init_CV_done) {
             Init_CV();
         }
-
     }
     ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+    // Использование stringstream для форматирования строки
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2) << "Cpu Load: " << std::setw(6) << var.cpu_load << " %";
+    ImGui::Text("%s", ss.str().c_str());
+
+
 
     ImGui::End();
 }
