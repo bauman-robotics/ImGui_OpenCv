@@ -21,6 +21,7 @@
 #include <regex>
 #include <chrono>
 #include "log_file.h"
+#include "defines.h"
 
 using namespace std;
 
@@ -246,14 +247,11 @@ void ReadSocketData() {
                 // Чтение данных от клиента
 
                 //receive a message from the client (listen)
-                //cout << "Awaiting client response..." << endl;
                 memset(&msg, 0, sizeof(msg));//clear the buffer
                 //bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
 
                 bytesRead_n = recv(newSd, (char*)&msg, sizeof(msg), 0);
-
-                //cout << "recv =" << bytesRead<< endl;
-                
+              
                 bytesRead +=bytesRead_n; 
                 
                 if(!strcmp(msg, "exit"))
@@ -261,24 +259,6 @@ void ReadSocketData() {
                     cout << "Client has quit the session" << endl;
                     break;
                 }
-
-
-                //cout << "Client: " << msg << endl;
-
-                #ifdef DEBUG_COUT
-                    cout <<  msg << endl;
-                #endif
-                //cout << ">";
-                //string data;
-                //getline(cin, data);
-                //memset(&msg, 0, sizeof(msg)); //clear the buffer
-                //strcpy(msg, data.c_str());
-                // if(data == "exit")
-                // {
-                //     //send to the client that server has closed the connection
-                //     send(newSd, (char*)&msg, strlen(msg), 0);
-                //     break;
-                // }
 
                 if (var.socket.send.need_to_be_sended.load() == 1) {
                     var.socket.send.need_to_be_sended.store(0);

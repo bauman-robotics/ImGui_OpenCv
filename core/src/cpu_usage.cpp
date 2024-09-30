@@ -59,7 +59,7 @@ double getCPULoad(pid_t pid, double interval) {
     double cpu_time_start = getCPUTime(pid);
 
     #ifdef DEBUG_COUT
-           cout << "getCPULoad()" << endl;
+           //cout << "getCPULoad()" << endl;
     #endif 
 
     this_thread::sleep_for(chrono::seconds(static_cast<int>(interval)));

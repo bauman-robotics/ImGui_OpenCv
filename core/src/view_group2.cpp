@@ -28,7 +28,7 @@ void View_Group_2() {
     }
 
     static const char* combo_items[] = { "1", "3", "5", "10", "20", "50", "100", "200", "500", "1000" };
-    static int combo_current_item = 1;
+    static int combo_current_item = 3;
 
     // Устанавливаем ширину следующего элемента. Например, 200.0f пикселей.
     ImGui::SetNextItemWidth(100.0f);

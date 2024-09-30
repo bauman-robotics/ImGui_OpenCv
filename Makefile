@@ -5,7 +5,7 @@ CXX = g++
 CXXFLAGS = -std=c++17 -I/usr/include/opencv4 -Iimgui -Ibackends -Icore/inc $(DEBUG_FLAGS)
 
 # Укажите флаги для отладки
-#DEBUG_FLAGS = -g
+DEBUG_FLAGS = -g
 
 # Укажите файлы исходного кода
 SRCS = $(shell find core/src -name '*.cpp') \
