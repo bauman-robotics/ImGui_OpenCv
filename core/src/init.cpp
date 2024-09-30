@@ -1,6 +1,7 @@
 #include "main.h"
 #include <filesystem> // Для работы с путями
 #include "ini_file.h"
+#include "cpu_usage.h"
 
 // Прототипы функций
 int InitGLFWAndImGui(GLFWwindow** window);
@@ -42,6 +43,24 @@ int Init_All(GLFWwindow** window) {
             //Select_Mode(CTRL_MODE);
         }
     }
+
+    Get_CPU_Load_Init(); 
+
+    //=================================================
+    // Получаем IP адрес
+    unsigned char* ip = get_current_ip();
+    
+    if (ip) {
+        // Копируем IP адрес в структуру
+        memcpy(var.socket.curr_ip, ip, 4);
+        printf("Current IP address in bytes: %d.%d.%d.%d\n", var.socket.curr_ip[0], var.socket.curr_ip[1], var.socket.curr_ip[2], var.socket.curr_ip[3]);
+        
+    } else {
+        printf("Failed to get IP address.\n");
+    }
+
+    delete[] ip; // Освобождаем выделенную память
+
     return 0;
 }
 //=========================================================================

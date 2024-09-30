@@ -9,10 +9,6 @@
 #include <view_groups.h>
 //======================================
 
-
-
-//======================================
-
 void View_Group_8(void) {    
 
     //=== Шестая группа Управление ком-портом =================
@@ -21,7 +17,11 @@ void View_Group_8(void) {
 
     ImGui::BeginChild("Group 8", ImVec2(280, 270), true);
 
-    ImGui::Text("Socket port");
+    //========================================
+        
+    ImGui::Text("Current IP: %d.%d.%d.%d", var.socket.curr_ip[0], var.socket.curr_ip[1], var.socket.curr_ip[2], var.socket.curr_ip[3]);
+    
+    ImGui::Text("Socket port:");
     ImGui::InputInt("##", &var.socket.port);
 
     //========================================

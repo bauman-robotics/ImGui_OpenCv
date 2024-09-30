@@ -6,6 +6,7 @@
 #include "tcp-Server.h"
 #include "cpu_usage.h"
 
+using namespace std;
 //============================================================================
 
 void InitImGuiFrame() {
@@ -48,8 +49,8 @@ int main(int, char**)
     }      
     //=============================
 
-    Get_CPU_Load_Init(); 
-    //Create_Log_File();
+
+    //===================================================
 
     // Основной цикл
     while (!glfwWindowShouldClose(window))

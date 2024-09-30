@@ -31,3 +31,7 @@
 #include <termios.h>
 #include <uart.h>
 #include "log_file.h"
+
+#include "get_ip.h"
+
+

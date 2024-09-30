@@ -49,6 +49,7 @@ typedef struct {
     //==================     
     std::string data_prefix;
     //==================
+    uint8_t curr_ip[4];
     int port;
     bool init_socket_done;
     bool have_to_be_closed;

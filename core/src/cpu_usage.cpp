@@ -82,9 +82,9 @@ double getCPULoad(pid_t pid, double interval) {
 // Функция, которая будет запущена в отдельном потоке
 void measureCPULoad(pid_t pid, double interval, atomic<bool>& stop_flag) {
 
-    cout << "measureCPULoad()" << endl;
-    cout << "2_stop_flag.load() = " << stop_flag << endl;
-    cout << "interval = " << interval << endl;
+    // cout << "measureCPULoad()" << endl;
+    // cout << "2_stop_flag.load() = " << stop_flag << endl;
+    // cout << "interval = " << interval << endl;
     cout << "pid = " << pid << endl;    
     while (!stop_flag.load()) {
         try {
@@ -102,9 +102,9 @@ void Get_CPU_Load_Init() {
     double interval = 1.0; // Интервал в секундах
     static atomic<bool> stop_flag(false);
 
-    cout << "1_stop_flag() = " << stop_flag << endl;
+    //cout << "1_stop_flag() = " << stop_flag << endl;
 
-    cout << "Get_CPU_Load_Init()" << endl;
+    //cout << "Get_CPU_Load_Init()" << endl;
     // Создаем и запускаем поток для измерения загрузки процессора
     cpu_load_thread = thread(measureCPULoad, pid, interval, ref(stop_flag));
 

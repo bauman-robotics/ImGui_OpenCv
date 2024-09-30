@@ -6,9 +6,9 @@ void View_Group_2() {
     ImGui::Text("Группа 2");
 
     // Радиокнопки и комбобокс
-    static int selected_radio = 0;
+    static int selected_radio = 1;
     static const char* combo_items[] = { "Red", "Green", "Blue" };
-    static int combo_current_item = 0;
+    static int combo_current_item = 1;
 
     if (ImGui::RadioButton("Red", selected_radio == 0)) { 
         selected_radio = 0; 
