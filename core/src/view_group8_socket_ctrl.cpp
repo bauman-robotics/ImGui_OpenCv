@@ -69,6 +69,21 @@ void View_Group_8(void) {
         var.log.log_Is_Started = 0;
     }
  
+    static bool checkbox_hex = false;
+    ImGui::Checkbox("HEX Format", &checkbox_hex);
+
+    if (ImGui::IsItemEdited())
+    {
+        if (checkbox_hex) {
+            sprintf(var.socket.send.message, "%s", "HEX");          
+            var.socket.send.need_to_be_sended.store(1);    
+        } else {
+            sprintf(var.socket.send.message, "%s", "ASCII");          
+            var.socket.send.need_to_be_sended.store(1); 
+        }
+    }
+
+
     ImGui::EndChild();
 }
 //==================================================================================

@@ -28,7 +28,10 @@ int Init_All(GLFWwindow** window) {
 
     var.com_port.name = "/dev/ttyACM0";
 
-    var.com_port.data_prefix = "data";
+    //var.com_port.data_prefix = "data";
+    var.com_port.data_prefix = DATA_PREFIX;
+    var.socket.data_prefix = DATA_PREFIX;
+    printf("DATA_PREFIX: \"%s\"\n", DATA_PREFIX.c_str());
 
     var.com_port.i_baud_rate = 115200;
     

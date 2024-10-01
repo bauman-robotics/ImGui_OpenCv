@@ -3,7 +3,7 @@
 void View_Group_2() {
 
     ImGui::BeginChild("Group 2", ImVec2(300, 150), true);
-    ImGui::Text("Группа 2");
+    //ImGui::Text("Группа 2");
 
     // Радиокнопки и комбобокс
     static int selected_radio = 1;
@@ -34,13 +34,27 @@ void View_Group_2() {
     ImGui::SetNextItemWidth(100.0f);
     ImGui::Combo("Период пакетов, ms", &combo_current_item, combo_items, IM_ARRAYSIZE(combo_items));
 
-    // Обновление радиокнопок при изменении комбобокса
     if (ImGui::IsItemEdited())
     {
         //selected_radio = combo_current_item;
         //std::cout << "Период пакетов = " << combo_items[combo_current_item] << std::endl;
 
         sprintf(var.socket.send.message, "%s%s", "PER", combo_items[combo_current_item]);          
+        var.socket.send.need_to_be_sended.store(1); 
+    }
+
+    //==========================================================================
+    static const char* combo_items_num[] = { "1", "3", "5", "10", "20", "40", "50", "100", "150", "200"};
+    static int combo_current_item_num = 3;
+    ImGui::SetNextItemWidth(100.0f);
+    ImGui::Combo("Значений в пакете", &combo_current_item_num, combo_items_num, IM_ARRAYSIZE(combo_items_num));
+
+    if (ImGui::IsItemEdited())
+    {
+        //selected_radio = combo_current_item;
+        //std::cout << "Период пакетов = " << combo_items[combo_current_item] << std::endl;
+
+        sprintf(var.socket.send.message, "%s%s", "NUM", combo_items_num[combo_current_item_num]);          
         var.socket.send.need_to_be_sended.store(1); 
     }
 

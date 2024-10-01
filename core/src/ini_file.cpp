@@ -81,6 +81,7 @@ void Keys_Parser(std::string key, std::string value) {
     //================================   
     if (key == "data_prefix") {
         var.com_port.data_prefix = value;
+        var.socket.data_prefix = value;        
     }
     //================================   
     if (key == "baud_rate") {

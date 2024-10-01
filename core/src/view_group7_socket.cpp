@@ -25,7 +25,9 @@ void View_Group_7(void) {
     std::vector<int> new_parser_data;
     // Парсинг данных
     if (var.socket.init_socket_done) {
-        new_parser_data = parseSocketData("data");
+        //new_parser_data = parseSocketData("data");
+        //var.socket.data_prefix = DATA_PREFIX;
+        new_parser_data = parseSocketData(var.socket.data_prefix);
 
         parsed_data.insert(parsed_data.end(),
                 new_parser_data.begin(),

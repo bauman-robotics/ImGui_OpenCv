@@ -11,4 +11,8 @@
 
 #define SERVER_SOCKET_PORT (18082)
 
+//#define DATA_PREFIX "data"
+const std::string DATA_PREFIX = "d";
+
 //#define DEBUG_COUT 
+

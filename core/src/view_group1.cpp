@@ -30,8 +30,20 @@ void View_Group_1() {
         items1_cstr.clear();
     }
 
-    static bool checkbox1 = false;
-    ImGui::Checkbox("Отметить меня 1", &checkbox1);
+    static bool checkbox = false;
+    ImGui::Checkbox("Check Me", &checkbox);
+
+    // if (ImGui::IsItemEdited())
+    // {
+    //     if (checkbox) {
+    //         sprintf(var.socket.send.message, "%s", "HEX");          
+    //         var.socket.send.need_to_be_sended.store(1);    
+    //     } else {
+    //         sprintf(var.socket.send.message, "%s", "ASCII");          
+    //         var.socket.send.need_to_be_sended.store(1); 
+    //     }
+    // }
+
     ImGui::ListBox("Листбокс 1", &item_current1, items1_cstr.data(), items1_cstr.size());
     ImGui::EndChild();
 
