@@ -31,18 +31,19 @@ void View_Group_1() {
     }
 
     static bool checkbox = false;
-    ImGui::Checkbox("Check Me", &checkbox);
+    ImGui::Checkbox("Socket_Chart_Enable", &checkbox);
 
-    // if (ImGui::IsItemEdited())
-    // {
-    //     if (checkbox) {
-    //         sprintf(var.socket.send.message, "%s", "HEX");          
-    //         var.socket.send.need_to_be_sended.store(1);    
-    //     } else {
-    //         sprintf(var.socket.send.message, "%s", "ASCII");          
-    //         var.socket.send.need_to_be_sended.store(1); 
-    //     }
-    // }
+    if (ImGui::IsItemEdited())
+    {
+        if (checkbox) {
+            var.socket.chart_enable = 1;
+ 
+            std::cout << "chart_enable" << std::endl;            
+        } else {
+            var.socket.chart_enable = 0;
+            std::cout << "chart_disable" << std::endl;
+        }        
+    }
 
     ImGui::ListBox("Листбокс 1", &item_current1, items1_cstr.data(), items1_cstr.size());
     ImGui::EndChild();

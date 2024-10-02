@@ -13,7 +13,7 @@ using namespace std;
 namespace fs =filesystem;
 
 void Create_Log_File(void);
-void Add_Str_To_Log_File(uint8_t* strLog, bool isSendLog);
+void Add_Str_To_Log_File(uint8_t* strLog, int msg_len);
 
 //===================================================================================================
 
@@ -70,27 +70,36 @@ void Create_Log_File(void) {
 //===================================================================================================
 
 
+// // Функция для добавления строки в лог-файл
+// void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
+//     // Получаем полное имя текущего файла лога
+//     string strFullName = var.log.curr_Log_File_Name;
+    
+//     // Создаем строку для записи
+//     string str = "";
+
+//     // Добавляем содержимое strLog к строке
+//     str += reinterpret_cast<char*>(strLog);  // Преобразуем указатель на uint8_t* в строку
+
+//     // Открываем файл для добавления строки в конец
+//     ofstream file(strFullName, ios::app);  // Открываем файл в режиме добавления
+
+//     if (file.is_open()) {
+//         // Записываем строку в файл
+//         file << str << endl;
+//         file.close();
+//     } else {
+//         cerr << "Ошибка при открытии файла: " << strFullName << endl;
+//     }
+// }
+
 // Функция для добавления строки в лог-файл
-void Add_Str_To_Log_File(uint8_t* strLog, bool isSendLog) {
+void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
     // Получаем полное имя текущего файла лога
     string strFullName = var.log.curr_Log_File_Name;
     
     // Создаем строку для записи
-    string str = "";
-
-    // if (isSendLog) {
-    //     str = "> ";
-    // } else {
-    //     str = "< ";
-    // }
-
-    // Добавляем содержимое strLog к строке
-    str += reinterpret_cast<char*>(strLog);  // Преобразуем указатель на uint8_t* в строку
-
-    // Удаляем последний символ, если строка больше чем два символа
-    // if (str.length() > 2) {
-    //     str.pop_back();  // Удалить последний символ
-    // }
+    std::string str(reinterpret_cast<char*>(strLog), msg_len);
 
     // Открываем файл для добавления строки в конец
     ofstream file(strFullName, ios::app);  // Открываем файл в режиме добавления

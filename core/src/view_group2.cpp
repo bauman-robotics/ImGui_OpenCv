@@ -44,8 +44,8 @@ void View_Group_2() {
     }
 
     //==========================================================================
-    static const char* combo_items_num[] = { "1", "3", "5", "10", "20", "40", "50", "100", "150", "200"};
-    static int combo_current_item_num = 3;
+    static const char* combo_items_num[] = { "1", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "600", "700", "746", "800", "900", "1000"};
+    static int combo_current_item_num = 1;
     ImGui::SetNextItemWidth(100.0f);
     ImGui::Combo("Значений в пакете", &combo_current_item_num, combo_items_num, IM_ARRAYSIZE(combo_items_num));
 

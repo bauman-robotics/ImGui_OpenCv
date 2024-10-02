@@ -25,24 +25,26 @@
 
 using namespace std;
 
-static std::atomic<int> is_binding(0);
-static std::atomic<bool> need_to_reopen_socket_port(0);
-static std::atomic<bool> state_wait_client(0);
-static std::atomic<bool> keep_running(0);
-static std::atomic<int> packet_count(0);
-static std::atomic<int> packets_per_second(0);
+static atomic<int> is_binding(0);
+static atomic<bool> need_to_reopen_socket_port(0);
+static atomic<bool> state_wait_client(0);
+static atomic<bool> keep_running(0);
+static atomic<int> packet_count(0);
+static atomic<int> packets_per_second(0);
 
-static std::atomic<int> val_data_count(0);
-static std::atomic<int> val_data_per_second(0);
+static atomic<int> val_data_count(0);
+static atomic<int> val_data_per_second(0);
 
-static std::thread binding_thread;
-static std::thread socket_thread;
-static std::thread wait_client_thread;
-static std::mutex data_mutex;
+static thread binding_thread;
+static thread socket_thread;
+static thread wait_client_thread;
+static mutex data_mutex;
 
-static std::vector<std::string> socket_data;
+// static vector<string> socket_data;
 
-static char msg[1600];
+static vector<byte> socket_data;
+
+static byte msg[1600];
 static int newSd;
 static int serverSd = 0;
 static int bytesRead = 0;
@@ -65,6 +67,9 @@ double Get_Val_Data_PerSecond_S();
 void Check_Socket_Connect();
 
 void Wait_Socket_Client(); // Потоковая функция ожидание подключения клиента 
+
+vector<int> parseSocketData(const string& prefix);
+vector<int> parseBinarySocketData(); 
 
 sockaddr_in newSockAddr;
 socklen_t newSockAddrSize = sizeof(newSockAddr);
@@ -89,7 +94,7 @@ int Socket_Server_Init(int port) {
         // }
         
         // // Запуск потока ожидания подключения клиента         
-        // wait_client_thread = std::thread(Wait_Socket_Client);
+        // wait_client_thread = thread(Wait_Socket_Client);
 
         // var.socket.init_socket_done = 1;
     } else {
@@ -160,8 +165,8 @@ void Wait_Socket_Client() {
             continue;
         }
 
-        std::cout << "Принято новое соединение" << std::endl;
-        std::cout << "newSd=" << newSd << std::endl;   
+        cout << "Принято новое соединение" << endl;
+        cout << "newSd=" << newSd << endl;   
 
         // Запуск потока приема данных 
         //if (!keep_running) {
@@ -183,12 +188,12 @@ void Start_Server_Thread() {
     keep_running  = true;
 
     // Запуск потока для чтения данных из Socket
-    socket_thread = std::thread(ReadSocketData);
+    socket_thread = thread(ReadSocketData);
 
     // Запуск потока для обновления количества пакетов в секунду
-    std::thread([]() {
+    thread([]() {
         while (keep_running) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            this_thread::sleep_for(chrono::seconds(1));
             UpdateSocketPacketsPerSecond();
             UpdateSocketValDataPerSecond();
         }
@@ -211,7 +216,7 @@ void Stop_Socket_Thread() {
 // Функция чтения данных из Socket
 void ReadSocketData() {
     //char buf[256];
-    auto start_time = std::chrono::steady_clock::now();
+    auto start_time = chrono::steady_clock::now();
 
     fd_set readfds;
     struct timeval timeout;
@@ -225,6 +230,8 @@ void ReadSocketData() {
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
 
+        // Инициализация вектора для хранения данных
+        static vector<byte> data;
 
         int activity = select(newSd + 1, &readfds, NULL, NULL, &timeout);
         //cout << "activity =" << activity<< endl;
@@ -236,7 +243,7 @@ void ReadSocketData() {
             need_to_reopen_socket_port = 1;            
             break;
         } else if (activity == 0) {
-            std::cout << "Таймаут: клиент неактивен" << std::endl;
+            cout << "Таймаут: клиент неактивен" << endl;
             close(newSd);
             state_wait_client = 1;  // Сброс состояния ожидания клиента
             keep_running = 0;
@@ -246,102 +253,180 @@ void ReadSocketData() {
             if (FD_ISSET(newSd, &readfds)) {
                 // Чтение данных от клиента
 
-                //receive a message from the client (listen)
-                memset(&msg, 0, sizeof(msg));//clear the buffer
-                //bytesRead += recv(newSd, (char*)&msg, sizeof(msg), 0);
-
                 bytesRead_n = recv(newSd, (char*)&msg, sizeof(msg), 0);
-              
-                bytesRead +=bytesRead_n; 
                 
-                if(!strcmp(msg, "exit"))
-                {
-                    cout << "Client has quit the session" << endl;
-                    break;
-                }
+                bytesRead +=bytesRead_n; 
 
+                #ifdef DEBUG_COUT
+                    cout << "Received " << bytesRead_n << " Bytes" << endl;
+                #endif 
+
+                //==== Отправка данных клиенту ====
                 if (var.socket.send.need_to_be_sended.load() == 1) {
                     var.socket.send.need_to_be_sended.store(0);
                     send(newSd, var.socket.send.message, strlen(var.socket.send.message), 0);
                     cout << "send to Client: " << var.socket.send.message << endl;
                 }
+                //=================================
 
                 // Чтение данных
-                int n = strlen(msg);
-                if (n > 0) {
-                    msg[n] = '\0';
-                    std::string line(msg);
-                    std::lock_guard<std::mutex> data_lock(data_mutex);
-
+                if (bytesRead_n > 0) {
+                    lock_guard<mutex> data_lock(data_mutex);
+ 
                     if (var.log.log_Is_Started) {
-                        Add_Str_To_Log_File((uint8_t *)&msg, 0);
+                        Add_Str_To_Log_File((uint8_t *)&msg, bytesRead_n);
                     }
-                    socket_data.push_back(line);
+                    socket_data.insert(socket_data.end(), msg, msg + bytesRead_n);
                     packet_count++;
                     #ifdef DEBUG_COUT
-                        std::cout << "packet_count____________________________________" << packet_count << std::endl;
+                        cout << "packet_count____________________________________" << packet_count << endl;
                     #endif 
-                    //send the message to client
-                    //bytesWritten += send(newSd, (char*)&msg, strlen(msg), 0);
-
-                } else if (n < 0) {
-                    std::cerr << "Ошибка чтения socket" << std::endl;
+                } else if (bytesRead_n == 0) {
+                    cout << "Клиент закрыл соединение" << endl;
+                    close(newSd);
+                    state_wait_client = 1;  
+                    keep_running = 0;
+                    need_to_reopen_socket_port = 1;
+                    break;
+                } else {
+                    cerr << "Ошибка чтения из сокета" << endl;
                     break;
                 }
             }
-
         }          
     }
 }
-
 //====================================================================
 
-std::vector<int> parseSocketData(const std::string& prefix) {
+vector<int> parseSocketData(const string& prefix) {
+    lock_guard<mutex> lock(data_mutex);  // Защита чтения
 
-    std::vector<int> results;
-    std::regex pattern(prefix + R"(\s+(\d+)*)");
-
-    std::vector<std::string> socket_data_buf;
-    std::lock_guard<std::mutex> lock(data_mutex); // Защита чтения
-    socket_data_buf = std::move(socket_data);
- 
-    for (const auto& data : socket_data_buf) {
+    // Проверяем, что буфер не пустой
+    if (socket_data.empty()) {
         #ifdef DEBUG_COUT
-            std::cout << "data = " << data << "\n";
-        #endif 
-        //==================
-        auto begin = std::sregex_iterator(data.begin(), data.end(), pattern);
-        auto end = std::sregex_iterator();
-    
-        // Поиск всех вхождений префекса данных
-        for(auto i = begin; i != end; ++i)  {
-            std::smatch match = *i;
-            string prefix_str = match.str();
-            #ifdef DEBUG_COUT
-                std::cout << "prefix_str = " << prefix_str << std::endl;
-            #endif 
-            // Вытаскиваем значение из каждой подстроки с префиксом.
-            std::smatch match_1_val;
-            if (std::regex_search(prefix_str, match_1_val, pattern)) {
+            //cout << "socket_data is empty, returning empty results.\n";
+        #endif
+        return {};  // Возвращаем пустой вектор
+    }
+
+    // Перемещаем данные из socket_data в socket_data_buf
+    vector<byte> socket_data_buf = move(socket_data);
+
+    // Очищаем оригинальный буфер
+    socket_data.clear();
+
+    vector<int> results;
+    regex pattern(prefix + R"(\s+(\d+))");
+
+    string strData;
+    for (const auto& byte : socket_data_buf) {
+        strData += static_cast<char>(byte);  // Явное преобразование byte в char
+    }
+
+    #ifdef DEBUG_COUT
+        cout << "data = " << strData << "\n";
+    #endif
+
+    // Поиск всех вхождений префикса данных
+    auto begin = sregex_iterator(strData.begin(), strData.end(), pattern);
+    auto end = sregex_iterator();
+
+    for (auto i = begin; i != end; ++i) {
+        smatch match = *i;
+        string prefix_str = match.str();
+        #ifdef DEBUG_COUT
+            //cout << "prefix_str = " << prefix_str << endl;
+        #endif
+
+        // Вытаскиваем значение из каждой подстроки с префиксом.
+        if (match.size() > 1) {
+            try {
+                int value = stoi(match[1].str());
+                results.push_back(value);
+                val_data_count++;
                 #ifdef DEBUG_COUT
-                    std::cout << "results =" << std::stoi(match_1_val[1].str()) << "\n";    
-                #endif  
-                try {    
-                    results.push_back(std::stoi(match_1_val[1].str())); 
-                }  
-                catch(...) {
-                    std::cout << "stoi(match_1_val[1].str() Err "  << "\n"; 
-                }      
-                val_data_count++; 
-                #ifdef DEBUG_COUT     
-                    std::cout << "val_data_count = " << val_data_count << std::endl;  
-                #endif      
+                    cout << "results = " << value << "\n";
+                    cout << "val_data_count = " << val_data_count << endl;
+                #endif
+            } catch (const exception& e) {
+                cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
             }
+        }
+    }
+
+    return results;
+}
+
+//==========================================================================
+
+
+vector<int> parseBinarySocketData() {
+
+    const uint16_t HEADER_SIZE = 4;
+
+    lock_guard<mutex> lock(data_mutex);  // Защита чтения
+
+    // Проверяем, что буфер не пустой
+    if (socket_data.empty()) {
+        #ifdef DEBUG_COUT
+            // cout << "socket_data is empty, returning empty results.\n";
+        #endif
+        return {};  // Возвращаем пустой вектор
+    }
+
+    // Перемещаем данные из socket_data в socket_data_buf
+    vector<byte> socket_data_buf = move(socket_data);
+
+    // Очищаем оригинальный буфер
+    socket_data.clear();
+
+    vector<int> results;
+    size_t pos = 0;
+
+    while (pos < socket_data_buf.size()) {
+        // Читаем заголовок пакета
+        BinPacketHeader header;
+
+        if (socket_data_buf.size() < HEADER_SIZE) {
+            break;  // Недостаточно данных для чтения type и full_packet_size
+        }
+        header.type.low = (uint8_t)socket_data_buf[pos];
+        pos++;    
+        header.type.hi  = (uint8_t)socket_data_buf[pos];    
+        pos++;    
+        header.type.val = header.type.hi << 8 | header.type.low;    
+        //===============
+        header.full_packet_size.low = (uint8_t)socket_data_buf[pos];
+        pos++;    
+        header.full_packet_size.hi  = (uint8_t)socket_data_buf[pos];
+        pos++;            
+        header.full_packet_size.val = (header.full_packet_size.hi << 8) | header.full_packet_size.low;
+       
+
+        // Проверяем, совпадает ли тип пакета с целевым
+        if (header.type.val == BYNARY_PACKET_KEY) {
+            // Проверяем, хватает ли данных в векторе для чтения тела пакета
+            if (pos + (header.full_packet_size.val - HEADER_SIZE) <= socket_data_buf.size()) {
+                // Читаем тело пакета и добавляем его в выходной вектор
+                for (size_t i = 0; i < (header.full_packet_size.val - 4); i += 2) {
+                    int16_t value = (static_cast<int16_t>(socket_data_buf[pos + i + 1]) << 8) | static_cast<int16_t>(socket_data_buf[pos + i]);
+                    results.push_back(value);
+                    val_data_count++;
+                }
+                pos += (header.full_packet_size.val) - HEADER_SIZE;
+            } else {
+                // Недостаточно данных для чтения полного пакета
+                break;
+            }
+        } else {
+            // Пропускаем пакет с неподходящим типом
+            pos += (header.full_packet_size.val);
         }
     }
     return results;
 }
 //================================================
+
 
 void UpdateSocketPacketsPerSecond() {
     static int last_count = 0;
@@ -409,7 +494,7 @@ double Get_Val_Data_PerSecond_S() {
 
 int interval_ms = 2000;
 // Переменная для хранения времени последней проверки флага
-auto last_check_time = std::chrono::steady_clock::now();
+auto last_check_time = chrono::steady_clock::now();
 
 void Check_Socket_Connect() {
 
@@ -432,8 +517,8 @@ void Check_Socket_Connect() {
     if (var.socket.have_to_be_binded) {
 
         // Ждём заданный промежуток времени с момента последней проверки
-        auto current_time = std::chrono::steady_clock::now();
-        auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_check_time).count();
+        auto current_time = chrono::steady_clock::now();
+        auto elapsed_time = chrono::duration_cast<chrono::milliseconds>(current_time - last_check_time).count();
         if (elapsed_time >= interval_ms) {
             
             cout << "Try_to_bind_Socket" << endl;
@@ -460,7 +545,7 @@ void Check_Socket_Connect() {
                 }
                 
                 // Запуск потока ожидания подключения клиента         
-                wait_client_thread = std::thread(Wait_Socket_Client);
+                wait_client_thread = thread(Wait_Socket_Client);
 
                 var.socket.init_socket_done = 1;
                 //============================================         

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "init.h"
+#include "defines.h"
 
 void View_Cv_Group_2() {
 

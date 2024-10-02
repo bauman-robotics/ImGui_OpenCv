@@ -1,5 +1,6 @@
 #include "main.h"
-    
+#include "defines.h"
+
 void Menu_Item(void) {
     // Установка позиции и размера окна
     ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);

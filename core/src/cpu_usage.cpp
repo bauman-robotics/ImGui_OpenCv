@@ -11,7 +11,6 @@
 #include <atomic>
 
 #include "variables.h"
-#include "defines.h"
 
 using namespace std;
 

@@ -75,10 +75,12 @@ void View_Group_8(void) {
     if (ImGui::IsItemEdited())
     {
         if (checkbox_hex) {
-            sprintf(var.socket.send.message, "%s", "HEX");          
+            sprintf(var.socket.send.message, "%s", "HEX");      
+            var.socket.hex_receive = 1;    
             var.socket.send.need_to_be_sended.store(1);    
         } else {
             sprintf(var.socket.send.message, "%s", "ASCII");          
+            var.socket.hex_receive = 0;
             var.socket.send.need_to_be_sended.store(1); 
         }
     }

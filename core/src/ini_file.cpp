@@ -3,7 +3,7 @@
 #include <set>
 #include <cstdint>
 #include <stdexcept>
-
+#include "defines.h"
 
 std::set<std::string> active_windows = { "[MainWindow]", "[CustomSettings]" };
 

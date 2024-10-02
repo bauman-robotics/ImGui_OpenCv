@@ -9,7 +9,6 @@
 #include "view_groups.h"
 #include "variables.h"
 
-
 void showImage();
 
 //==============================================

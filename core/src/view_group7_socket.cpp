@@ -25,71 +25,77 @@ void View_Group_7(void) {
     std::vector<int> new_parser_data;
     // Парсинг данных
     if (var.socket.init_socket_done) {
-        //new_parser_data = parseSocketData("data");
-        //var.socket.data_prefix = DATA_PREFIX;
-        new_parser_data = parseSocketData(var.socket.data_prefix);
+        if (!var.socket.hex_receive) {
+            new_parser_data = parseSocketData(var.socket.data_prefix);
+
+
+        } else {
+            new_parser_data = parseBinarySocketData(); 
+        }
 
         parsed_data.insert(parsed_data.end(),
                 new_parser_data.begin(),
                 new_parser_data.end());
 
+
     }
     //====  График значений ===========
+    if (var.socket.chart_enable) {
 
-    // Преобразование данных в формат для ImGui::PlotLines
-    y_coords.clear();
-    for (int number : parsed_data) {
-        y_coords.push_back(static_cast<float>(number));
-    }
-
-    // Радиокнопки для выбора типа графика
-    static int graph_type = 0; // 0 - линии, 1 - гистограмма, 2 - окно последних значений
-    ImGui::RadioButton("Линии", &graph_type, 0);
-    ImGui::SameLine();
-    ImGui::RadioButton("Гистограмма", &graph_type, 1);
-    ImGui::SameLine();
-    ImGui::RadioButton("Окно последних значений", &graph_type, 2);
-
-    //==================================================================================
-    // Слайдер для регулировки ширины окна последних значений
-    static int window_size = 100; // Размер окна последних значений
-    if (graph_type == 2) {
-        ImGui::SliderInt("Ширина окна", &window_size, 1, 1000);
-    } else {
-        ImGui::BeginDisabled();
-        ImGui::SliderInt("Ширина окна", &window_size, 1, 1000);
-        ImGui::EndDisabled();
-    }
-
-    // Получаем доступную ширину контента
-    ImVec2 available_size = ImGui::GetContentRegionAvail();
-
-        // Устанавливаем желаемую высоту графика
-    float plot_height = 150.0f;
-
-
-    // Отображение графика
-    if (graph_type == 0) {
-        // Рисуем график, используя доступную ширину и заданную высоту
-        ImGui::PlotLines("Socket", y_coords.data(), static_cast<int>(y_coords.size()), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(available_size.x, plot_height));
-
-    } else if (graph_type == 1) {
-        ImGui::PlotHistogram("Socket", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
-    } else if (graph_type == 2) {
-        if (y_coords.size() > window_size) {
-            ImGui::PlotLines("Socket", &y_coords[y_coords.size() - window_size], window_size, 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
-        } else {
-            ImGui::PlotLines("Socket", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
+        // Преобразование данных в формат для ImGui::PlotLines
+        y_coords.clear();
+        for (int number : parsed_data) {
+            y_coords.push_back(static_cast<float>(number));
         }
-    }
 
-    // Кнопка для очистки графика
-    if (ImGui::Button("Очистить график")) { 
-        Clear_Socket_Data();
-    }
-    //================================
+        // Радиокнопки для выбора типа графика
+        static int graph_type = 0; // 0 - линии, 1 - гистограмма, 2 - окно последних значений
+        ImGui::RadioButton("Линии", &graph_type, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Гистограмма", &graph_type, 1);
+        ImGui::SameLine();
+        ImGui::RadioButton("Окно последних значений", &graph_type, 2);
 
-    ImGui::SameLine();
+        //==================================================================================
+        // Слайдер для регулировки ширины окна последних значений
+        static int window_size = 100; // Размер окна последних значений
+        if (graph_type == 2) {
+            ImGui::SliderInt("Ширина окна", &window_size, 1, 1000);
+        } else {
+            ImGui::BeginDisabled();
+            ImGui::SliderInt("Ширина окна", &window_size, 1, 1000);
+            ImGui::EndDisabled();
+        }
+
+        // Получаем доступную ширину контента
+        ImVec2 available_size = ImGui::GetContentRegionAvail();
+
+            // Устанавливаем желаемую высоту графика
+        float plot_height = 150.0f;
+
+    
+        // Отображение графика
+        if (graph_type == 0) {
+            // Рисуем график, используя доступную ширину и заданную высоту
+            ImGui::PlotLines("Socket", y_coords.data(), static_cast<int>(y_coords.size()), 0, NULL, FLT_MAX, FLT_MAX, ImVec2(available_size.x, plot_height));
+
+        } else if (graph_type == 1) {
+            ImGui::PlotHistogram("Socket", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
+        } else if (graph_type == 2) {
+            if (y_coords.size() > window_size) {
+                ImGui::PlotLines("Socket", &y_coords[y_coords.size() - window_size], window_size, 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
+            } else {
+                ImGui::PlotLines("Socket", y_coords.data(), y_coords.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
+            }
+        }
+        // Кнопка для очистки графика
+        if (ImGui::Button("Очистить график")) { 
+            Clear_Socket_Data();
+        }
+        //================================
+
+        ImGui::SameLine();
+    }
 
     // Отображение количества пакетов в секунду с использованием EMA
     double alpha = 0.1; // Коэффициент сглаживания

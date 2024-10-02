@@ -16,3 +16,4 @@ const std::string DATA_PREFIX = "d";
 
 //#define DEBUG_COUT 
 
+const uint16_t BYNARY_PACKET_KEY = 2255;

@@ -16,7 +16,7 @@
 #include <fstream>
 #include <algorithm>
 //==================
-#include "defines.h"
+//#include "defines.h"
 #include "fonts.h"
 #include "init.h"
 #include "variables.h"

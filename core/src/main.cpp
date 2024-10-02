@@ -5,6 +5,7 @@
 #include "ini_file.h"
 #include "tcp-Server.h"
 #include "cpu_usage.h"
+#include "defines.h"
 
 using namespace std;
 //============================================================================

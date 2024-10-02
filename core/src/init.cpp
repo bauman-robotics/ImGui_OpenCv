@@ -2,6 +2,7 @@
 #include <filesystem> // Для работы с путями
 #include "ini_file.h"
 #include "cpu_usage.h"
+#include "defines.h"
 
 // Прототипы функций
 int InitGLFWAndImGui(GLFWwindow** window);
@@ -31,11 +32,14 @@ int Init_All(GLFWwindow** window) {
     //var.com_port.data_prefix = "data";
     var.com_port.data_prefix = DATA_PREFIX;
     var.socket.data_prefix = DATA_PREFIX;
+    var.socket.hex_receive = 0; 
     printf("DATA_PREFIX: \"%s\"\n", DATA_PREFIX.c_str());
 
     var.com_port.i_baud_rate = 115200;
     
     var.socket.port = SERVER_SOCKET_PORT;
+
+    var.socket.chart_enable = 1;
 
     LoadCustomSettings(var.io->IniFilename);
 

@@ -8,6 +8,19 @@
 #include <opencv2/opencv.hpp>
 //============================
 #include <atomic>
+//================================
+
+typedef struct {
+    uint8_t low;       // Тип сообщения
+    uint8_t hi;    
+    uint16_t val;
+} Header_Type;
+
+typedef struct {
+    Header_Type type;               // Тип сообщения
+    Header_Type full_packet_size;   // Размер данных в байтах
+} BinPacketHeader;
+
 
 typedef struct {  
     //==================     
@@ -57,6 +70,8 @@ typedef struct {
     //bool have_to_be_open;    
     //==================    
     socket_send send;
+    bool hex_receive;
+    bool chart_enable;
 } socket_s;
 //================================
 
