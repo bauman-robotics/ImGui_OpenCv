@@ -9,6 +9,7 @@
 //============================
 #include <atomic>
 //================================
+using namespace std;
 
 typedef struct {
     uint8_t low;       // Тип сообщения
@@ -38,13 +39,13 @@ typedef struct {
 
 typedef struct {  
     //==================     
-    std::string name;
-    std::string last_port_name;
-    std::string data_prefix;
+    string name;
+    string last_port_name;
+    string data_prefix;
     uint32_t i_baud_rate;
     //==================
-    std::vector<const char*> ports_list;
-    std::string selected_port;
+    vector<const char*> ports_list;
+    string selected_port;
     int selected_port_index;
     bool init_serial_done;
     bool have_to_be_closed;
@@ -54,13 +55,13 @@ typedef struct {
 typedef struct {  
     //==================     
     char message[10];
-    std::atomic<bool> need_to_be_sended;  
+    atomic<bool> need_to_be_sended;  
     //==================    
 } socket_send;
 //================================
 typedef struct {  
     //==================     
-    std::string data_prefix;
+    string data_prefix;
     //==================
     uint8_t curr_ip[4];
     int port;
@@ -76,10 +77,10 @@ typedef struct {
 //================================
 
 typedef struct {
-    std::string curr_Log_File_Name;
+    string curr_Log_File_Name;
     bool    log_Is_Started;
-    std::string currentFolderName;
-    std::string strFullFileName;
+    string currentFolderName;
+    string strFullFileName;
 } Log_File_Type;
 //================================
 
@@ -89,6 +90,11 @@ typedef struct {
     int groupSize_y;
 } Mouse_Type;
 //================================
+
+typedef struct {
+    atomic<int64_t> parser_data_size;
+    atomic<int64_t> new_parser_data_size;
+} Debug_Type;
 
 
 typedef struct {   
@@ -111,8 +117,11 @@ typedef struct {
     //==================
     Log_File_Type log;
     Mouse_Type mouse;
+    Debug_Type debug;
 
 } variables;
+
+
 
 extern variables var;
 

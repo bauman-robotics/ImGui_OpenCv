@@ -196,6 +196,9 @@ void Start_Server_Thread() {
             this_thread::sleep_for(chrono::seconds(1));
             UpdateSocketPacketsPerSecond();
             UpdateSocketValDataPerSecond();
+
+            cout << "parser_data_size " << var.debug.parser_data_size.load() << endl;
+            cout << "new_parser_data_size " << var.debug.new_parser_data_size.load() << endl;
         }
         packets_per_second.store(0);
         val_data_per_second.store(0);
@@ -364,21 +367,25 @@ vector<int> parseBinarySocketData() {
 
     const uint16_t HEADER_SIZE = 4;
 
-    lock_guard<mutex> lock(data_mutex);  // Защита чтения
+    vector<byte> socket_data_buf;
+    
+    {
+        lock_guard<mutex> lock(data_mutex);  // Защита чтения
 
-    // Проверяем, что буфер не пустой
-    if (socket_data.empty()) {
-        #ifdef DEBUG_COUT
-            // cout << "socket_data is empty, returning empty results.\n";
-        #endif
-        return {};  // Возвращаем пустой вектор
+        // Проверяем, что буфер не пустой
+        if (socket_data.empty()) {
+            #ifdef DEBUG_COUT
+                // cout << "socket_data is empty, returning empty results.\n";
+            #endif
+            return {};  // Возвращаем пустой вектор
+        }
+
+        // Перемещаем данные из socket_data в socket_data_buf
+        socket_data_buf = move(socket_data);
+
+        // Очищаем оригинальный буфер
+        socket_data.clear();
     }
-
-    // Перемещаем данные из socket_data в socket_data_buf
-    vector<byte> socket_data_buf = move(socket_data);
-
-    // Очищаем оригинальный буфер
-    socket_data.clear();
 
     vector<int> results;
     size_t pos = 0;
