@@ -30,19 +30,19 @@ void View_Group_1() {
         items1_cstr.clear();
     }
 
-    static bool checkbox = false;
-    ImGui::Checkbox("Socket_Chart_Enable", &checkbox);
+    static bool checkbox = true;
+    ImGui::Checkbox("Check me", &checkbox);
 
     if (ImGui::IsItemEdited())
     {
-        if (checkbox) {
-            var.socket.chart_enable = 1;
+        // if (checkbox) {
+        //     var.socket.chart_enable = 1;
  
-            std::cout << "chart_enable" << std::endl;            
-        } else {
-            var.socket.chart_enable = 0;
-            std::cout << "chart_disable" << std::endl;
-        }        
+        //     std::cout << "chart_enable" << std::endl;            
+        // } else {
+        //     var.socket.chart_enable = 0;
+        //     std::cout << "chart_disable" << std::endl;
+        // }        
     }
 
     ImGui::ListBox("Листбокс 1", &item_current1, items1_cstr.data(), items1_cstr.size());

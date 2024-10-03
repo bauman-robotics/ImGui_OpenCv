@@ -3,15 +3,22 @@
 #include "tcp-Server.h"
 #include <atomic>
 
+#include <iostream>
+#include <vector>
+#include <string>
+#include "defines.h"
 
-static std::atomic<double> smoothed_packets_per_second(0.0);
-static std::atomic<double> smoothed_val_data_per_second(0.0);
-static std::vector<float> y_coords;
+static atomic<double> smoothed_packets_per_second(0.0);
+static atomic<double> smoothed_val_data_per_second(0.0);
+static vector<float> y_coords;
 
-static std::mutex data_mutex;
-static std::vector<int> parsed_data;   
+static mutex data_mutex;
+static vector<int> parsed_data;   
+
+using namespace std;
 
 double CalculateEMA_Socet(double current_value, double previous_ema, double alpha);
+
 void Clear_Socket_Data();
 //======================================
 
@@ -22,23 +29,29 @@ void View_Group_7(void) {
     ImGui::BeginChild("Group 7", ImVec2(575, 270), true);
     ImGui::Text("Группа 7 - Данные из Socket");
 
-    std::vector<int> new_parser_data;
+    vector<int> new_parser_data;
     // Парсинг данных
     if (var.socket.init_socket_done) {
+
         if (!var.socket.hex_receive) {
             new_parser_data = parseSocketData(var.socket.data_prefix);
 
-
         } else {
             new_parser_data = parseBinarySocketData(); 
+
+            if (var.log.log_Is_Started) {
+                if (new_parser_data.size()) {                    
+                    
+                    Add_Str_To_Log_File_HEX(new_parser_data);
+                }
+            } 
         }
 
         parsed_data.insert(parsed_data.end(),
                 new_parser_data.begin(),
                 new_parser_data.end());
-
-
     }
+
     //====  График значений ===========
     if (var.socket.chart_enable) {
 
@@ -104,16 +117,16 @@ void View_Group_7(void) {
     smoothed_packets_per_second.store(CalculateEMA_Socet(current_packets_per_second, smoothed_packets_per_second.load(), alpha));
 
     // Использование stringstream для форматирования строки
-    std::stringstream ss;
-    ss << std::fixed << std::setprecision(2) << "Пакетов в секунду: " << std::setw(6) << smoothed_packets_per_second.load();
+    stringstream ss;
+    ss << fixed << setprecision(2) << "Пакетов в секунду: " << setw(6) << smoothed_packets_per_second.load();
     ImGui::Text("%s", ss.str().c_str());
 
     //============  Количество значений в секунду =======
     double current_val_data_per_second = Get_Val_Data_PerSecond_S(); //parsed_data.size();//
     smoothed_val_data_per_second.store(CalculateEMA_Socet(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
     // Использование stringstream для форматирования строки
-    std::stringstream ss1;
-    ss1 << std::fixed << std::setprecision(2) << "Значений в секунду: " << std::setw(6) << smoothed_val_data_per_second.load();
+    stringstream ss1;
+    ss1 << fixed << setprecision(2) << "Значений в секунду: " << setw(6) << smoothed_val_data_per_second.load();
     ImGui::Text("%s", ss1.str().c_str());
 
     //======================================================
@@ -130,7 +143,9 @@ double CalculateEMA_Socet(double current_value, double previous_ema, double alph
 
 
 void Clear_Socket_Data() {
-    std::lock_guard<std::mutex> lock(data_mutex);
+    lock_guard<mutex> lock(data_mutex);
     parsed_data.clear();    
     y_coords.clear();
 }
+//==================================================================================
+

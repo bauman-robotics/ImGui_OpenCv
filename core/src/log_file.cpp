@@ -8,13 +8,19 @@
 
 #include "main.h"
 #include "log_file.h"
+
+#include <cstdlib>
+#include <unistd.h> // для access()
+#include <sys/stat.h> // для stat()
+
     
 using namespace std;
 namespace fs =filesystem;
 
 void Create_Log_File(void);
 void Add_Str_To_Log_File(uint8_t* strLog, int msg_len);
-
+void Add_Str_To_Log_File_HEX(string str);
+string Vector_To_String(const vector<int>& vector); 
 //===================================================================================================
 
 void Create_Log_File(void) {
@@ -29,7 +35,7 @@ void Create_Log_File(void) {
     // Получаем текущее локальное время
     auto now =chrono::system_clock::now();
    time_t now_time =chrono::system_clock::to_time_t(now);
-   tm local_tm = *std::localtime(&now_time);
+   tm local_tm = *localtime(&now_time);
 
     // Формат времени: ГГГГ_ММ_ДД
    ostringstream oss;
@@ -61,6 +67,7 @@ void Create_Log_File(void) {
         file.close();
 
         var.log.curr_Log_File_Name = strFullFileLogName;
+        var.log.currentFolderName = strFolderName;
         var.log.log_Is_Started = true;
 
     } else {
@@ -69,37 +76,13 @@ void Create_Log_File(void) {
 }
 //===================================================================================================
 
-
-// // Функция для добавления строки в лог-файл
-// void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
-//     // Получаем полное имя текущего файла лога
-//     string strFullName = var.log.curr_Log_File_Name;
-    
-//     // Создаем строку для записи
-//     string str = "";
-
-//     // Добавляем содержимое strLog к строке
-//     str += reinterpret_cast<char*>(strLog);  // Преобразуем указатель на uint8_t* в строку
-
-//     // Открываем файл для добавления строки в конец
-//     ofstream file(strFullName, ios::app);  // Открываем файл в режиме добавления
-
-//     if (file.is_open()) {
-//         // Записываем строку в файл
-//         file << str << endl;
-//         file.close();
-//     } else {
-//         cerr << "Ошибка при открытии файла: " << strFullName << endl;
-//     }
-// }
-
 // Функция для добавления строки в лог-файл
 void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
     // Получаем полное имя текущего файла лога
     string strFullName = var.log.curr_Log_File_Name;
     
     // Создаем строку для записи
-    std::string str(reinterpret_cast<char*>(strLog), msg_len);
+    string str(reinterpret_cast<char*>(strLog), msg_len);
 
     // Открываем файл для добавления строки в конец
     ofstream file(strFullName, ios::app);  // Открываем файл в режиме добавления
@@ -112,3 +95,66 @@ void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
         cerr << "Ошибка при открытии файла: " << strFullName << endl;
     }
 }
+//===================================================================================================
+
+// Функция для добавления строки в лог-файл
+void Add_Str_To_Log_File_HEX(vector<int> vec_int_packet) {
+    string str;
+    str = Vector_To_String(vec_int_packet);
+
+    // Открываем файл для добавления строки в конец
+    ofstream file(var.log.curr_Log_File_Name, ios::app);  // Открываем файл в режиме добавления
+
+    if (file.is_open()) {
+        // Записываем строку в файл
+        file << str << endl;
+        file.close();
+    } else {
+        cerr << "Ошибка при открытии файла: " << var.log.curr_Log_File_Name << endl;
+    }
+}
+//====================================================================
+
+bool Open_Folder(const string& folder_name) {
+  // Проверяем, существует ли папка и является ли она директорией.
+  struct stat s;
+  if (stat(folder_name.c_str(), &s) == 0) {
+    if (S_ISDIR(s.st_mode)) {
+      // Формируем команду для xdg-open.
+      string command = "xdg-open \"" + folder_name + "\"";
+
+      // Выполняем команду.
+      int result = system(command.c_str());
+
+      // Проверяем на наличие ошибок.  0 обычно означает успех.
+      if (result == 0) {
+        return true;
+      } else {
+        cerr << "Ошибка при выполнении xdg-open: " << result << endl;
+        return false;
+      }
+    } else {
+      cerr << "Ошибка: '" << folder_name << "' не является директорией." << endl;
+      return false;
+    }
+  } else {
+    cerr << "Ошибка: '" << folder_name << "' не существует." << endl;
+    return false;
+  }
+}
+//====================================================================
+
+string Vector_To_String(const vector<int>& vector) {
+  stringstream ss;
+    
+    // Проходим по каждому элементу вектора
+    for (size_t i = 0; i < vector.size(); ++i) {
+        ss << vector[i];  // Добавляем элемент в строковый поток
+        //if (i < vector.size() - 1) {
+            ss << " ";  // Добавляем пробел, если это не последний элемент
+        //}
+    }
+    
+    return ss.str();  // Возвращаем строку из строкового потока
+}
+//====================================================================

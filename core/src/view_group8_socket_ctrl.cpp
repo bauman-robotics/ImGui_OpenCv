@@ -7,6 +7,15 @@
 
 #include <tcp-Server.h>
 #include <view_groups.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <filesystem>
+#include "log_file.h"
+
+using namespace std;
+namespace fs = filesystem;
+
 //======================================
 
 void View_Group_8(void) {    
@@ -57,6 +66,7 @@ void View_Group_8(void) {
     if (ImGui::Button("  Start Save   ")) {
         Create_Log_File();
         //var.log.log_Is_Started = 1;
+        cout << "Start Log File" << endl;
         
     }
     ImGui::PopStyleColor();
@@ -67,6 +77,7 @@ void View_Group_8(void) {
   
     if (ImGui::Button("   Stop Save    ")) {
         var.log.log_Is_Started = 0;
+        cout << "Stop Log File" << endl;
     }
  
     static bool checkbox_hex = false;
@@ -83,6 +94,73 @@ void View_Group_8(void) {
             var.socket.hex_receive = 0;
             var.socket.send.need_to_be_sended.store(1); 
         }
+    }
+
+    //=======================================
+
+    if (ImGui::Button("  Open Folder  ")) {
+
+        cout <<  "Open Folder: " << var.log.currentFolderName << endl;
+
+        Open_Folder(var.log.currentFolderName); 
+        
+
+        // Open log file 
+        // string command = "xdg-open " + var.log.curr_Log_File_Name;
+        
+        // int result = system(command.c_str());
+        // if (result != 0) {
+        //     cerr << "Failed to open folder: " << var.log.curr_Log_File_Name << endl;
+        // }    
+    }
+
+    ImGui::SameLine();
+
+    //========================================
+    if (ImGui::Button("  Clear Folder  ")) {
+
+        cout <<  "Delete Folder: " << var.log.currentFolderName << endl;
+        try {
+            //for (const auto& entry : fs::recursive_directory_iterator(var.log.curr_Log_File_Name)) {
+            for (const auto& entry : fs::recursive_directory_iterator(var.log.currentFolderName)) {                
+                if (fs::is_regular_file(entry.path())) {
+                    fs::remove(entry.path());
+                }
+            }
+        } catch (const fs::filesystem_error& e) {
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
+    //========================================
+
+    if (ImGui::Button("    Open File   ")) {
+
+        cout <<  "Open Lig file: " << var.log.curr_Log_File_Name << endl;
+
+
+        // Open log file 
+        string command = "xdg-open " + var.log.curr_Log_File_Name;
+        
+        int result = system(command.c_str());
+        if (result != 0) {
+            cerr << "Failed to open folder: " << var.log.curr_Log_File_Name << endl;
+        }    
+    }
+
+   //========================================
+   static bool checkbox = true;
+    ImGui::Checkbox("Chart Enable", &checkbox);
+
+    if (ImGui::IsItemEdited())
+    {
+        if (checkbox) {
+            var.socket.chart_enable = 1;
+ 
+            std::cout << "chart_enable" << std::endl;            
+        } else {
+            var.socket.chart_enable = 0;
+            std::cout << "chart_disable" << std::endl;
+        }        
     }
 
 

@@ -40,6 +40,10 @@ int Init_All(GLFWwindow** window) {
     var.socket.port = SERVER_SOCKET_PORT;
 
     var.socket.chart_enable = 1;
+    
+    #ifdef MOUSE_CHART_ENABLE
+        var.mouse.mouse_chart_enable = 1;
+    #endif 
 
     LoadCustomSettings(var.io->IniFilename);
 

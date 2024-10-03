@@ -44,7 +44,7 @@ static mutex data_mutex;
 
 static vector<byte> socket_data;
 
-static byte msg[1600];
+static byte msg[SOCKET_MSG_BUF_SIZE];
 static int newSd;
 static int serverSd = 0;
 static int bytesRead = 0;
@@ -273,7 +273,7 @@ void ReadSocketData() {
                 if (bytesRead_n > 0) {
                     lock_guard<mutex> data_lock(data_mutex);
  
-                    if (var.log.log_Is_Started) {
+                    if ((var.log.log_Is_Started) && (!var.socket.hex_receive)) {
                         Add_Str_To_Log_File((uint8_t *)&msg, bytesRead_n);
                     }
                     socket_data.insert(socket_data.end(), msg, msg + bytesRead_n);

@@ -83,6 +83,14 @@ typedef struct {
 } Log_File_Type;
 //================================
 
+typedef struct {
+    bool mouse_chart_enable;
+    int groupSize_x;
+    int groupSize_y;
+} Mouse_Type;
+//================================
+
+
 typedef struct {   
     bool cv_mode;
     bool ctrl_mode;
@@ -102,6 +110,7 @@ typedef struct {
     double cpu_load;
     //==================
     Log_File_Type log;
+    Mouse_Type mouse;
 
 } variables;
 
