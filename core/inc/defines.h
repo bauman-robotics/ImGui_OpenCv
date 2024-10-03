@@ -17,9 +17,10 @@ const std::string DATA_PREFIX = "d";
 //#define DEBUG_COUT 
 
 const uint16_t BYNARY_PACKET_KEY = 2255;
-
+const uint16_t FLOAT_PRECISION   = 2;
 
 //#define MOUSE_CHART_ENABLE
 
 #define SOCKET_MSG_BUF_SIZE (1600)
 #define MAX_HEX_VALS_IN_PACKET (700)
+

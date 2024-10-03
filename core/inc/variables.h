@@ -73,6 +73,7 @@ typedef struct {
     socket_send send;
     bool hex_receive;
     bool chart_enable;
+    vector<float> data_f;
 } socket_s;
 //================================
 
@@ -91,10 +92,11 @@ typedef struct {
 } Mouse_Type;
 //================================
 
-typedef struct {
-    atomic<int64_t> parser_data_size;
-    atomic<int64_t> new_parser_data_size;
-} Debug_Type;
+// typedef struct {
+//     atomic<int32_t> parser_data_size;
+//     atomic<int32_t> new_parser_data_size;
+//     atomic<int32_t> plot_data_size;
+// } Debug_Type;
 
 
 typedef struct {   
@@ -117,7 +119,7 @@ typedef struct {
     //==================
     Log_File_Type log;
     Mouse_Type mouse;
-    Debug_Type debug;
+  //  Debug_Type debug;
 
 } variables;
 

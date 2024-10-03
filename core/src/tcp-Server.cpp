@@ -22,7 +22,7 @@
 #include <chrono>
 #include "log_file.h"
 #include "defines.h"
-#include <cstddef>  // Для std::byte
+#include <cstddef>  // Для byte
 
 using namespace std;
 
@@ -81,8 +81,8 @@ void Check_Socket_Connect();
 
 void Wait_Socket_Client(); // Потоковая функция ожидание подключения клиента 
 
-vector<int> parseSocketData(const string& prefix);
-vector<int> parseBinarySocketData(); 
+vector<float> parseSocketData_Float(const string& prefix);
+vector<float> parseBinarySocketData_Float();
 
 sockaddr_in newSockAddr;
 socklen_t newSockAddrSize = sizeof(newSockAddr);
@@ -210,8 +210,9 @@ void Start_Server_Thread() {
             UpdateSocketPacketsPerSecond();
             UpdateSocketValDataPerSecond();
 
-            cout << "parser_data_size " << var.debug.parser_data_size.load() << endl;
-            cout << "new_parser_data_size " << var.debug.new_parser_data_size.load() << endl;
+            // cout << "parser_data_size " << var.debug.parser_data_size.load() << endl;
+            // cout << "new_parser_data_size " << var.debug.new_parser_data_size.load() << endl;
+            // cout << "plot_data_size " << var.debug.plot_data_size.load() << endl;            
         }
         packets_per_second.store(0);
         val_data_per_second.store(0);
@@ -239,7 +240,7 @@ void ReadSocketData() {
     fd_set readfds;
     struct timeval timeout;
 
-    std::vector<byte> incoming_data(SOCKET_MSG_BUF_SIZE);  // Убедитесь, что вектор достаточно велик
+    vector<byte> incoming_data(SOCKET_MSG_BUF_SIZE);  // Убедитесь, что вектор достаточно велик
 
     while(keep_running)   {
 
@@ -286,12 +287,12 @@ void ReadSocketData() {
                     break;   
                 }          
 
-                //std::cout << "Received " << bytesRead_n << " bytes" << std::endl;  
+                //cout << "Received " << bytesRead_n << " bytes" << endl;  
 
                 // Добавляем считанные данные в активный буфер
                 // Защищаем доступ к общему буферу с использованием мьютекса (кратковременная операция)
                 {
-                    std::lock_guard<std::mutex> lock(buffer_mutex);
+                    lock_guard<mutex> lock(buffer_mutex);
                     active_buffer->insert(active_buffer->end(), incoming_data.begin(), incoming_data.begin() + bytesRead_n);
                 }
                                
@@ -322,73 +323,11 @@ void ReadSocketData() {
         }          
     }
 }
-// //====================================================================
-
-// vector<int> parseSocketData(const string& prefix) {
-//     lock_guard<mutex> lock(data_mutex);  // Защита чтения
-
-//     // Проверяем, что буфер не пустой
-//     if (socket_data.empty()) {
-//         #ifdef DEBUG_COUT
-//             //cout << "socket_data is empty, returning empty results.\n";
-//         #endif
-//         return {};  // Возвращаем пустой вектор
-//     }
-
-//     // Перемещаем данные из socket_data в socket_data_buf
-//     vector<byte> socket_data_buf = move(socket_data);
-
-//     // Очищаем оригинальный буфер
-//     socket_data.clear();
-
-//     vector<int> results;
-//     regex pattern(prefix + R"(\s+(\d+))");
-
-//     string strData;
-//     for (const auto& byte : socket_data_buf) {
-//         strData += static_cast<char>(byte);  // Явное преобразование byte в char
-//     }
-
-//     #ifdef DEBUG_COUT
-//         cout << "data = " << strData << "\n";
-//     #endif
-
-//     // Поиск всех вхождений префикса данных
-//     auto begin = sregex_iterator(strData.begin(), strData.end(), pattern);
-//     auto end = sregex_iterator();
-
-//     for (auto i = begin; i != end; ++i) {
-//         smatch match = *i;
-//         string prefix_str = match.str();
-//         #ifdef DEBUG_COUT
-//             //cout << "prefix_str = " << prefix_str << endl;
-//         #endif
-
-//         // Вытаскиваем значение из каждой подстроки с префиксом.
-//         if (match.size() > 1) {
-//             try {
-//                 int value = stoi(match[1].str());
-//                 results.push_back(value);
-//                 val_data_count++;
-//                 #ifdef DEBUG_COUT
-//                     cout << "results = " << value << "\n";
-//                     cout << "val_data_count = " << val_data_count << endl;
-//                 #endif
-//             } catch (const exception& e) {
-//                 cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
-//             }
-//         }
-//     }
-
-//     return results;
-// }
-
-
 //====================================================================
 
-vector<int> parseSocketData(const string& prefix) {
+vector<float> parseSocketData_Float(const string& prefix) {
 
-    vector<int> results;
+    vector<float> results;
     size_t pos = 0;
 
     // Локальный буфер для обработки
@@ -396,13 +335,20 @@ vector<int> parseSocketData(const string& prefix) {
 
     if (data_ready.load()) {
         {
-            std::lock_guard<std::mutex> lock(buffer_mutex);
+            lock_guard<mutex> lock(buffer_mutex);
             // Меняем буферы: активный буфер становится обрабатываемым, и наоборот
             swap(active_buffer, processing_buffer);
-            local_processing_buffer = std::move(*processing_buffer); // Перемещаем данные в локальный буфер
+            local_processing_buffer = move(*processing_buffer); // Перемещаем данные в локальный буфер
             processing_buffer->clear(); // Очищаем буфер для дальнейшего использования
             data_ready.store(false);  // Сбрасываем флаг
         }
+
+
+        if (var.log.log_Is_Started) {
+
+            Add_Str_To_Log_File_ASCII(local_processing_buffer); 
+        }
+
 
         regex pattern(prefix + R"(\s+(\d+))");
 
@@ -430,7 +376,8 @@ vector<int> parseSocketData(const string& prefix) {
             if (match.size() > 1) {
                 try {
                     int value = stoi(match[1].str());
-                    results.push_back(value);
+                    results.push_back(static_cast<float>(value));  // for log
+                    var.socket.data_f.push_back(static_cast<float>(value));
                     val_data_count++;
                     #ifdef DEBUG_COUT
                         cout << "results = " << value << "\n";
@@ -445,13 +392,11 @@ vector<int> parseSocketData(const string& prefix) {
 
     return results;
 }
+//================================================
 
-
-//==========================================================================
-
-vector<int> parseBinarySocketData() {
+vector<float> parseBinarySocketData_Float() {
     const uint16_t HEADER_SIZE = 4;
-    vector<int> results;
+    vector<float> results;
     size_t pos = 0;
 
     // Локальный буфер для обработки
@@ -459,10 +404,10 @@ vector<int> parseBinarySocketData() {
 
     if (data_ready.load()) {
         {
-            std::lock_guard<std::mutex> lock(buffer_mutex);
+            lock_guard<mutex> lock(buffer_mutex);
             // Меняем буферы: активный буфер становится обрабатываемым, и наоборот
             swap(active_buffer, processing_buffer);
-            local_processing_buffer = std::move(*processing_buffer); // Перемещаем данные в локальный буфер
+            local_processing_buffer = move(*processing_buffer); // Перемещаем данные в локальный буфер
             processing_buffer->clear(); // Очищаем буфер для дальнейшего использования
             data_ready.store(false);  // Сбрасываем флаг
         }
@@ -507,7 +452,8 @@ vector<int> parseBinarySocketData() {
                         for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += 2) {
                             int16_t value = (static_cast<int16_t>(local_processing_buffer.at(pos + i + 1)) << 8)
                                             | static_cast<int16_t>(local_processing_buffer.at(pos + i));
-                            results.push_back(value);
+                            results.push_back(static_cast<float>(value));  // for log
+                            var.socket.data_f.push_back(static_cast<float>(value));
                             val_data_count++;
                         }
                         pos += (header.full_packet_size.val - HEADER_SIZE);
@@ -526,6 +472,7 @@ vector<int> parseBinarySocketData() {
     return results;
 }
 //================================================
+
 
 
 void UpdateSocketPacketsPerSecond() {

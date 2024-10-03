@@ -65,7 +65,6 @@ void View_Group_8(void) {
 
     if (ImGui::Button("  Start Save   ")) {
         Create_Log_File();
-        //var.log.log_Is_Started = 1;
         cout << "Start Log File" << endl;
         
     }

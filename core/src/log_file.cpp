@@ -8,19 +8,20 @@
 
 #include "main.h"
 #include "log_file.h"
+#include "defines.h"
 
 #include <cstdlib>
 #include <unistd.h> // для access()
 #include <sys/stat.h> // для stat()
 
-    
 using namespace std;
 namespace fs =filesystem;
 
 void Create_Log_File(void);
-void Add_Str_To_Log_File(uint8_t* strLog, int msg_len);
-void Add_Str_To_Log_File_HEX(string str);
-string Vector_To_String(const vector<int>& vector); 
+
+void Add_Str_To_Log_File_ASCII(const vector<byte>& vec_byte_packet); 
+void Add_Str_To_Log_File_HEX_Float(const vector<float>& vec_float_packet);
+string Vector_Float_To_String(const vector<float>& vector, int precision); 
 //===================================================================================================
 
 void Create_Log_File(void) {
@@ -77,12 +78,12 @@ void Create_Log_File(void) {
 //===================================================================================================
 
 // Функция для добавления строки в лог-файл
-void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
+void Add_Str_To_Log_File_ASCII(const vector<byte>& vec_byte_packet) {
     // Получаем полное имя текущего файла лога
     string strFullName = var.log.curr_Log_File_Name;
-    
-    // Создаем строку для записи
-    string str(reinterpret_cast<char*>(strLog), msg_len);
+
+    // Преобразуем вектор байтов в строку (предполагая, что байты содержат ASCII символы)
+    string str(reinterpret_cast<const char*>(vec_byte_packet.data()), vec_byte_packet.size());
 
     // Открываем файл для добавления строки в конец
     ofstream file(strFullName, ios::app);  // Открываем файл в режиме добавления
@@ -98,9 +99,9 @@ void Add_Str_To_Log_File(uint8_t* strLog, int msg_len) {
 //===================================================================================================
 
 // Функция для добавления строки в лог-файл
-void Add_Str_To_Log_File_HEX(vector<int> vec_int_packet) {
+void Add_Str_To_Log_File_HEX_Float(const vector<float>& vec_float_packet) {
     string str;
-    str = Vector_To_String(vec_int_packet);
+    str = Vector_Float_To_String(vec_float_packet, FLOAT_PRECISION);
 
     // Открываем файл для добавления строки в конец
     ofstream file(var.log.curr_Log_File_Name, ios::app);  // Открываем файл в режиме добавления
@@ -144,17 +145,23 @@ bool Open_Folder(const string& folder_name) {
 }
 //====================================================================
 
-string Vector_To_String(const vector<int>& vector) {
-  stringstream ss;
+#include <vector>
+#include <sstream>
+#include <iomanip>  // Для std::fixed и std::setprecision
+
+using namespace std;
+
+string Vector_Float_To_String(const vector<float>& vector, int precision) {
+    stringstream ss;
+    ss << fixed << setprecision(precision);  // Ограничиваем количество знаков после запятой
     
     // Проходим по каждому элементу вектора
     for (size_t i = 0; i < vector.size(); ++i) {
         ss << vector[i];  // Добавляем элемент в строковый поток
-        //if (i < vector.size() - 1) {
+        if (i != vector.size() - 1) {
             ss << " ";  // Добавляем пробел, если это не последний элемент
-        //}
+        }
     }
     
     return ss.str();  // Возвращаем строку из строкового потока
 }
-//====================================================================
