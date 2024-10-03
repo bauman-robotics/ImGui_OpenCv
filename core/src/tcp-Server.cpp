@@ -22,6 +22,7 @@
 #include <chrono>
 #include "log_file.h"
 #include "defines.h"
+#include <cstddef>  // Для std::byte
 
 using namespace std;
 
@@ -44,7 +45,19 @@ static mutex data_mutex;
 
 static vector<byte> socket_data;
 
-static byte msg[SOCKET_MSG_BUF_SIZE];
+//static byte msg[SOCKET_MSG_BUF_SIZE];
+
+//==========================
+vector<byte> buffer1, buffer2;
+vector<byte>* active_buffer = &buffer1;     // Указатель на активный буфер
+vector<byte>* processing_buffer= &buffer2;  // Указатель на буфер для обработки
+mutex buffer_mutex;
+atomic<bool> data_ready(false);  // Флаг наличия данных для обработки
+
+
+//==========================
+
+
 static int newSd;
 static int serverSd = 0;
 static int bytesRead = 0;
@@ -216,13 +229,17 @@ void Stop_Socket_Thread() {
 }
 //================================================
 
+
+
 // Функция чтения данных из Socket
 void ReadSocketData() {
-    //char buf[256];
+
     auto start_time = chrono::steady_clock::now();
 
     fd_set readfds;
     struct timeval timeout;
+
+    std::vector<byte> incoming_data(SOCKET_MSG_BUF_SIZE);  // Убедитесь, что вектор достаточно велик
 
     while(keep_running)   {
 
@@ -233,11 +250,7 @@ void ReadSocketData() {
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
 
-        // Инициализация вектора для хранения данных
-        static vector<byte> data;
-
         int activity = select(newSd + 1, &readfds, NULL, NULL, &timeout);
-        //cout << "activity =" << activity<< endl;
         if (activity < 0) {
             perror("Ошибка при вызове select");
             close(newSd);
@@ -254,9 +267,39 @@ void ReadSocketData() {
             break;
         } else {
             if (FD_ISSET(newSd, &readfds)) {
-                // Чтение данных от клиента
 
-                bytesRead_n = recv(newSd, (char*)&msg, sizeof(msg), 0);
+                //==================================================================
+                             
+                bytesRead_n = recv(newSd, incoming_data.data(), SOCKET_MSG_BUF_SIZE, 0);
+
+                if (bytesRead_n < 0) {
+                    // Обработка ошибки или завершение чтения
+                    cerr << "Ошибка чтения из сокета" << endl;
+                    break;
+                }
+                if (bytesRead_n == 0) {
+                    cout << "Клиент закрыл соединение" << endl;
+                    close(newSd);
+                    state_wait_client = 1;  
+                    keep_running = 0;
+                    need_to_reopen_socket_port = 1;
+                    break;   
+                }          
+
+                //std::cout << "Received " << bytesRead_n << " bytes" << std::endl;  
+
+                // Добавляем считанные данные в активный буфер
+                // Защищаем доступ к общему буферу с использованием мьютекса (кратковременная операция)
+                {
+                    std::lock_guard<std::mutex> lock(buffer_mutex);
+                    active_buffer->insert(active_buffer->end(), incoming_data.begin(), incoming_data.begin() + bytesRead_n);
+                }
+                               
+                // Уведомление о том, что данные готовы для обработки
+                data_ready.store(true);
+
+                packet_count++;
+                //==================================================================
                 
                 bytesRead +=bytesRead_n; 
 
@@ -267,92 +310,135 @@ void ReadSocketData() {
                 //==== Отправка данных клиенту ====
                 if (var.socket.send.need_to_be_sended.load() == 1) {
                     var.socket.send.need_to_be_sended.store(0);
-                    send(newSd, var.socket.send.message, strlen(var.socket.send.message), 0);
-                    cout << "send to Client: " << var.socket.send.message << endl;
+                    ssize_t bytesSent = send(newSd, var.socket.send.message, strlen(var.socket.send.message), 0);
+                    if (bytesSent < 0) {
+                        perror("Ошибка отправки данных клиенту");
+                    } else {
+                        cout << "send to Client: " << var.socket.send.message << endl;
+                    }
                 }
                 //=================================
-
-                // Чтение данных
-                if (bytesRead_n > 0) {
-                    lock_guard<mutex> data_lock(data_mutex);
- 
-                    if ((var.log.log_Is_Started) && (!var.socket.hex_receive)) {
-                        Add_Str_To_Log_File((uint8_t *)&msg, bytesRead_n);
-                    }
-                    socket_data.insert(socket_data.end(), msg, msg + bytesRead_n);
-                    packet_count++;
-                    #ifdef DEBUG_COUT
-                        cout << "packet_count____________________________________" << packet_count << endl;
-                    #endif 
-                } else if (bytesRead_n == 0) {
-                    cout << "Клиент закрыл соединение" << endl;
-                    close(newSd);
-                    state_wait_client = 1;  
-                    keep_running = 0;
-                    need_to_reopen_socket_port = 1;
-                    break;
-                } else {
-                    cerr << "Ошибка чтения из сокета" << endl;
-                    break;
-                }
             }
         }          
     }
 }
+// //====================================================================
+
+// vector<int> parseSocketData(const string& prefix) {
+//     lock_guard<mutex> lock(data_mutex);  // Защита чтения
+
+//     // Проверяем, что буфер не пустой
+//     if (socket_data.empty()) {
+//         #ifdef DEBUG_COUT
+//             //cout << "socket_data is empty, returning empty results.\n";
+//         #endif
+//         return {};  // Возвращаем пустой вектор
+//     }
+
+//     // Перемещаем данные из socket_data в socket_data_buf
+//     vector<byte> socket_data_buf = move(socket_data);
+
+//     // Очищаем оригинальный буфер
+//     socket_data.clear();
+
+//     vector<int> results;
+//     regex pattern(prefix + R"(\s+(\d+))");
+
+//     string strData;
+//     for (const auto& byte : socket_data_buf) {
+//         strData += static_cast<char>(byte);  // Явное преобразование byte в char
+//     }
+
+//     #ifdef DEBUG_COUT
+//         cout << "data = " << strData << "\n";
+//     #endif
+
+//     // Поиск всех вхождений префикса данных
+//     auto begin = sregex_iterator(strData.begin(), strData.end(), pattern);
+//     auto end = sregex_iterator();
+
+//     for (auto i = begin; i != end; ++i) {
+//         smatch match = *i;
+//         string prefix_str = match.str();
+//         #ifdef DEBUG_COUT
+//             //cout << "prefix_str = " << prefix_str << endl;
+//         #endif
+
+//         // Вытаскиваем значение из каждой подстроки с префиксом.
+//         if (match.size() > 1) {
+//             try {
+//                 int value = stoi(match[1].str());
+//                 results.push_back(value);
+//                 val_data_count++;
+//                 #ifdef DEBUG_COUT
+//                     cout << "results = " << value << "\n";
+//                     cout << "val_data_count = " << val_data_count << endl;
+//                 #endif
+//             } catch (const exception& e) {
+//                 cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
+//             }
+//         }
+//     }
+
+//     return results;
+// }
+
+
 //====================================================================
 
 vector<int> parseSocketData(const string& prefix) {
-    lock_guard<mutex> lock(data_mutex);  // Защита чтения
-
-    // Проверяем, что буфер не пустой
-    if (socket_data.empty()) {
-        #ifdef DEBUG_COUT
-            //cout << "socket_data is empty, returning empty results.\n";
-        #endif
-        return {};  // Возвращаем пустой вектор
-    }
-
-    // Перемещаем данные из socket_data в socket_data_buf
-    vector<byte> socket_data_buf = move(socket_data);
-
-    // Очищаем оригинальный буфер
-    socket_data.clear();
 
     vector<int> results;
-    regex pattern(prefix + R"(\s+(\d+))");
+    size_t pos = 0;
 
-    string strData;
-    for (const auto& byte : socket_data_buf) {
-        strData += static_cast<char>(byte);  // Явное преобразование byte в char
-    }
+    // Локальный буфер для обработки
+    vector<byte> local_processing_buffer;
 
-    #ifdef DEBUG_COUT
-        cout << "data = " << strData << "\n";
-    #endif
+    if (data_ready.load()) {
+        {
+            std::lock_guard<std::mutex> lock(buffer_mutex);
+            // Меняем буферы: активный буфер становится обрабатываемым, и наоборот
+            swap(active_buffer, processing_buffer);
+            local_processing_buffer = std::move(*processing_buffer); // Перемещаем данные в локальный буфер
+            processing_buffer->clear(); // Очищаем буфер для дальнейшего использования
+            data_ready.store(false);  // Сбрасываем флаг
+        }
 
-    // Поиск всех вхождений префикса данных
-    auto begin = sregex_iterator(strData.begin(), strData.end(), pattern);
-    auto end = sregex_iterator();
+        regex pattern(prefix + R"(\s+(\d+))");
 
-    for (auto i = begin; i != end; ++i) {
-        smatch match = *i;
-        string prefix_str = match.str();
+        string strData;
+        for (const auto& byte : local_processing_buffer) {
+            strData += static_cast<char>(byte);  // Явное преобразование byte в char
+        }
+
         #ifdef DEBUG_COUT
-            //cout << "prefix_str = " << prefix_str << endl;
+            cout << "data = " << strData << "\n";
         #endif
 
-        // Вытаскиваем значение из каждой подстроки с префиксом.
-        if (match.size() > 1) {
-            try {
-                int value = stoi(match[1].str());
-                results.push_back(value);
-                val_data_count++;
-                #ifdef DEBUG_COUT
-                    cout << "results = " << value << "\n";
-                    cout << "val_data_count = " << val_data_count << endl;
-                #endif
-            } catch (const exception& e) {
-                cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
+        // Поиск всех вхождений префикса данных
+        auto begin = sregex_iterator(strData.begin(), strData.end(), pattern);
+        auto end = sregex_iterator();
+
+        for (auto i = begin; i != end; ++i) {
+            smatch match = *i;
+            string prefix_str = match.str();
+            #ifdef DEBUG_COUT
+                //cout << "prefix_str = " << prefix_str << endl;
+            #endif
+
+            // Вытаскиваем значение из каждой подстроки с префиксом.
+            if (match.size() > 1) {
+                try {
+                    int value = stoi(match[1].str());
+                    results.push_back(value);
+                    val_data_count++;
+                    #ifdef DEBUG_COUT
+                        cout << "results = " << value << "\n";
+                        cout << "val_data_count = " << val_data_count << endl;
+                    #endif
+                } catch (const exception& e) {
+                    cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
+                }
             }
         }
     }
@@ -360,76 +446,83 @@ vector<int> parseSocketData(const string& prefix) {
     return results;
 }
 
+
 //==========================================================================
 
-
 vector<int> parseBinarySocketData() {
-
     const uint16_t HEADER_SIZE = 4;
-
-    vector<byte> socket_data_buf;
-    
-    {
-        lock_guard<mutex> lock(data_mutex);  // Защита чтения
-
-        // Проверяем, что буфер не пустой
-        if (socket_data.empty()) {
-            #ifdef DEBUG_COUT
-                // cout << "socket_data is empty, returning empty results.\n";
-            #endif
-            return {};  // Возвращаем пустой вектор
-        }
-
-        // Перемещаем данные из socket_data в socket_data_buf
-        socket_data_buf = move(socket_data);
-
-        // Очищаем оригинальный буфер
-        socket_data.clear();
-    }
-
     vector<int> results;
     size_t pos = 0;
 
-    while (pos < socket_data_buf.size()) {
-        // Читаем заголовок пакета
-        BinPacketHeader header;
+    // Локальный буфер для обработки
+    vector<byte> local_processing_buffer;
 
-        if (socket_data_buf.size() < HEADER_SIZE) {
-            break;  // Недостаточно данных для чтения type и full_packet_size
+    if (data_ready.load()) {
+        {
+            std::lock_guard<std::mutex> lock(buffer_mutex);
+            // Меняем буферы: активный буфер становится обрабатываемым, и наоборот
+            swap(active_buffer, processing_buffer);
+            local_processing_buffer = std::move(*processing_buffer); // Перемещаем данные в локальный буфер
+            processing_buffer->clear(); // Очищаем буфер для дальнейшего использования
+            data_ready.store(false);  // Сбрасываем флаг
         }
-        header.type.low = (uint8_t)socket_data_buf[pos];
-        pos++;    
-        header.type.hi  = (uint8_t)socket_data_buf[pos];    
-        pos++;    
-        header.type.val = header.type.hi << 8 | header.type.low;    
-        //===============
-        header.full_packet_size.low = (uint8_t)socket_data_buf[pos];
-        pos++;    
-        header.full_packet_size.hi  = (uint8_t)socket_data_buf[pos];
-        pos++;            
-        header.full_packet_size.val = (header.full_packet_size.hi << 8) | header.full_packet_size.low;
-       
 
-        // Проверяем, совпадает ли тип пакета с целевым
-        if (header.type.val == BYNARY_PACKET_KEY) {
-            // Проверяем, хватает ли данных в векторе для чтения тела пакета
-            if (pos + (header.full_packet_size.val - HEADER_SIZE) <= socket_data_buf.size()) {
-                // Читаем тело пакета и добавляем его в выходной вектор
-                for (size_t i = 0; i < (header.full_packet_size.val - 4); i += 2) {
-                    int16_t value = (static_cast<int16_t>(socket_data_buf[pos + i + 1]) << 8) | static_cast<int16_t>(socket_data_buf[pos + i]);
-                    results.push_back(value);
-                    val_data_count++;
+        // Теперь данные находятся в локальном буфере, и мы можем их обрабатывать без мьютекса
+        if (!local_processing_buffer.empty()) {
+            while (pos < local_processing_buffer.size()) {
+                // Читаем заголовок пакета
+                if (local_processing_buffer.size() - pos < HEADER_SIZE) {
+                    break;  // Недостаточно данных для чтения заголовка
                 }
-                pos += (header.full_packet_size.val) - HEADER_SIZE;
-            } else {
-                // Недостаточно данных для чтения полного пакета
-                break;
+
+                BinPacketHeader header;
+
+                // Читаем первые 2 байта для типа пакета
+                header.type.low = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.type.hi = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.type.val = (static_cast<uint16_t>(header.type.hi) << 8) | header.type.low;
+
+                // Читаем следующие 2 байта для полного размера пакета
+                header.full_packet_size.low = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.full_packet_size.hi = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.full_packet_size.val = (static_cast<uint16_t>(header.full_packet_size.hi) << 8) | header.full_packet_size.low;
+
+                // Проверяем, совпадает ли тип пакета с целевым
+                if (header.type.val == BYNARY_PACKET_KEY) {
+
+
+                    // if (header.full_packet_size.val < HEADER_SIZE || 
+                    //     pos + header.full_packet_size.val > processing_buffer->size()) {
+                    //     // Недостаточно данных или некорректный размер пакета
+                    //     break;
+                    // }
+
+                    // Проверяем, хватает ли данных в векторе для чтения тела пакета
+                    if (pos + (header.full_packet_size.val - HEADER_SIZE) <= local_processing_buffer.size()) {
+                        // Читаем тело пакета и добавляем его в выходной вектор
+                        for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += 2) {
+                            int16_t value = (static_cast<int16_t>(local_processing_buffer.at(pos + i + 1)) << 8)
+                                            | static_cast<int16_t>(local_processing_buffer.at(pos + i));
+                            results.push_back(value);
+                            val_data_count++;
+                        }
+                        pos += (header.full_packet_size.val - HEADER_SIZE);
+                    } else {
+                        // Недостаточно данных для чтения полного пакета
+                        break;
+                    }
+                } else {
+                    // Пропускаем пакет с неподходящим типом
+                    pos += header.full_packet_size.val - HEADER_SIZE;
+                }
             }
-        } else {
-            // Пропускаем пакет с неподходящим типом
-            pos += (header.full_packet_size.val);
         }
     }
+
     return results;
 }
 //================================================

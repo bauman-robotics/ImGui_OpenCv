@@ -81,6 +81,9 @@
         "filesystem": "cpp",
         "__nullptr": "cpp",
         "__hash_table": "cpp",
-        "__tree": "cpp"
+        "__tree": "cpp",
+        "__split_buffer": "cpp",
+        "queue": "cpp",
+        "stack": "cpp"
     }
 }
