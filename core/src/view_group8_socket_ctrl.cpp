@@ -44,8 +44,6 @@ void View_Group_8(void) {
     if (ImGui::Button("       Open       ")) {
         Clear_Socket_Data();
         Socket_Server_Init(var.socket.port);
-
-        //var.socket.have_to_be_open = 1;
         
     }
     ImGui::PopStyleColor();
@@ -56,8 +54,6 @@ void View_Group_8(void) {
     if (ImGui::Button("       Close       ")) {
         if (var.socket.init_socket_done) {
             Socket_Close();
-
-            //var.socket.have_to_be_open = 0;
         }
     }
     //========================================
@@ -101,16 +97,7 @@ void View_Group_8(void) {
 
         cout <<  "Open Folder: " << var.log.currentFolderName << endl;
 
-        Open_Folder(var.log.currentFolderName); 
-        
-
-        // Open log file 
-        // string command = "xdg-open " + var.log.curr_Log_File_Name;
-        
-        // int result = system(command.c_str());
-        // if (result != 0) {
-        //     cerr << "Failed to open folder: " << var.log.curr_Log_File_Name << endl;
-        // }    
+        Open_Folder(var.log.currentFolderName);  
     }
 
     ImGui::SameLine();
@@ -120,7 +107,6 @@ void View_Group_8(void) {
 
         cout <<  "Delete Folder: " << var.log.currentFolderName << endl;
         try {
-            //for (const auto& entry : fs::recursive_directory_iterator(var.log.curr_Log_File_Name)) {
             for (const auto& entry : fs::recursive_directory_iterator(var.log.currentFolderName)) {                
                 if (fs::is_regular_file(entry.path())) {
                     fs::remove(entry.path());
