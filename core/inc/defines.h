@@ -12,12 +12,15 @@
 #define SERVER_SOCKET_PORT (18082)
 
 //#define DATA_PREFIX "data"
-const std::string DATA_PREFIX = "d";
+//const std::string DATA_PREFIX = "d";
+const std::string DATA_PREFIX = "f";
+#define BINARY_PACKET 
 
 //#define DEBUG_COUT 
 
-const uint16_t BYNARY_PACKET_KEY = 2255;
-const uint16_t FLOAT_PRECISION   = 2;
+const uint16_t BYNARY_PACKET_INT_KEY   = 2255;
+const uint16_t BYNARY_PACKET_FLOAT_KEY = 2233;
+const uint16_t FLOAT_PRECISION   = 0;
 
 //#define MOUSE_CHART_ENABLE
 

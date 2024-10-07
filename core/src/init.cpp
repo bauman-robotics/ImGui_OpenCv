@@ -32,7 +32,7 @@ int Init_All(GLFWwindow** window) {
     //var.com_port.data_prefix = "data";
     var.com_port.data_prefix = DATA_PREFIX;
     var.socket.data_prefix = DATA_PREFIX;
-    var.socket.hex_receive = 0; 
+
     printf("DATA_PREFIX: \"%s\"\n", DATA_PREFIX.c_str());
 
     var.com_port.i_baud_rate = 115200;
@@ -40,6 +40,16 @@ int Init_All(GLFWwindow** window) {
     var.socket.port = SERVER_SOCKET_PORT;
 
     var.socket.chart_enable = 1;
+
+    #ifdef BINARY_PACKET
+        var.socket.hex_receive = 1;    
+        var.socket.send.need_to_be_sended.store(1);     
+        sprintf(var.socket.send.message, "%s", "HEX");       
+    #else 
+        var.socket.hex_receive = 0;
+        var.socket.send.need_to_be_sended.store(1); 
+        sprintf(var.socket.send.message, "%s", "ASCII"); 
+    #endif 
     
     #ifdef MOUSE_CHART_ENABLE
         var.mouse.mouse_chart_enable = 1;

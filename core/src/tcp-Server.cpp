@@ -375,16 +375,20 @@ vector<float> parseSocketData_Float(const string& prefix) {
             // Вытаскиваем значение из каждой подстроки с префиксом.
             if (match.size() > 1) {
                 try {
-                    int value = stoi(match[1].str());
-                    results.push_back(static_cast<float>(value));  // for log
-                    var.socket.data_f.push_back(static_cast<float>(value));
+                    //int value = stoi(match[1].str());
+                    float value_f = stof(match[1].str());                    
+                    //results.push_back(static_cast<float>(value));  // for log
+                    //var.socket.data_f.push_back(static_cast<float>(value));
+                    results.push_back(value_f);  // for log
+                    var.socket.data_f.push_back(value_f);
+
                     val_data_count++;
                     #ifdef DEBUG_COUT
                         cout << "results = " << value << "\n";
                         cout << "val_data_count = " << val_data_count << endl;
                     #endif
                 } catch (const exception& e) {
-                    cerr << "stoi(match[1].str()) Err: " << e.what() << "\n";
+                    cerr << "stof(match[1].str()) Err: " << e.what() << "\n";
                 }
             }
         }
@@ -392,8 +396,9 @@ vector<float> parseSocketData_Float(const string& prefix) {
 
     return results;
 }
-//================================================
+//====================================================================
 
+// for float data 
 vector<float> parseBinarySocketData_Float() {
     const uint16_t HEADER_SIZE = 4;
     vector<float> results;
@@ -437,7 +442,8 @@ vector<float> parseBinarySocketData_Float() {
                 header.full_packet_size.val = (static_cast<uint16_t>(header.full_packet_size.hi) << 8) | header.full_packet_size.low;
 
                 // Проверяем, совпадает ли тип пакета с целевым
-                if (header.type.val == BYNARY_PACKET_KEY) {
+                // === Если данные в формате int ==============================                    
+                if (header.type.val == BYNARY_PACKET_INT_KEY) {
 
 
                     // if (header.full_packet_size.val < HEADER_SIZE || 
@@ -461,7 +467,26 @@ vector<float> parseBinarySocketData_Float() {
                         // Недостаточно данных для чтения полного пакета
                         break;
                     }
-                } else {
+                // === Если данные в формате float ==============================    
+                } else if (header.type.val == BYNARY_PACKET_FLOAT_KEY) {
+                    // Проверяем, хватает ли данных в векторе для чтения тела пакета
+                    if (pos + (header.full_packet_size.val - HEADER_SIZE) <= local_processing_buffer.size()) {
+                        // Читаем тело пакета и добавляем его в выходной вектор
+                        for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += sizeof(float)) {
+                            // Копируем байты float из буфера
+                            float value;
+                            std::memcpy(&value, &local_processing_buffer[pos + i], sizeof(float));
+                            
+                            results.push_back(value);  // for log
+                            var.socket.data_f.push_back(value);
+                            val_data_count++;
+                        }
+                        pos += (header.full_packet_size.val - HEADER_SIZE);
+                    } else {
+                        // Недостаточно данных для чтения полного пакета
+                        break;
+                    }      
+                }  else {
                     // Пропускаем пакет с неподходящим типом
                     pos += header.full_packet_size.val - HEADER_SIZE;
                 }
@@ -471,8 +496,7 @@ vector<float> parseBinarySocketData_Float() {
 
     return results;
 }
-//================================================
-
+//===========================================================================================
 
 
 void UpdateSocketPacketsPerSecond() {

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <filesystem>
 #include "log_file.h"
+#include "defines.h"
 
 using namespace std;
 namespace fs = filesystem;
@@ -74,8 +75,12 @@ void View_Group_8(void) {
         var.log.log_Is_Started = 0;
         cout << "Stop Log File" << endl;
     }
- 
-    static bool checkbox_hex = false;
+    #ifdef BINARY_PACKET
+        static bool checkbox_hex = true;
+    #else 
+        static bool checkbox_hex = false;
+    #endif 
+
     ImGui::Checkbox("HEX Format", &checkbox_hex);
 
     if (ImGui::IsItemEdited())

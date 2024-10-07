@@ -27,8 +27,8 @@ void View_Group_2() {
         var.socket.send.need_to_be_sended.store(1);      
     }
 
-    static const char* combo_items[] = { "1", "3", "5", "10", "20", "50", "100", "200", "500", "1000" };
-    static int combo_current_item = 3;
+    static const char* combo_items[] = {"5", "10", "15", "20", "25", "50", "100", "200", "500", "1000", "2000", "3000", "5000" };
+    static int combo_current_item = 1;
 
     // Устанавливаем ширину следующего элемента. Например, 200.0f пикселей.
     ImGui::SetNextItemWidth(100.0f);
@@ -44,8 +44,8 @@ void View_Group_2() {
     }
 
     //==========================================================================
-    static const char* combo_items_num[] = { "1", "10", "20", "40", "50", "100", "150", "200", "300", "400", "500", "600", "700", "746", "800", "900", "1000"};
-    static int combo_current_item_num = 1;
+    static const char* combo_items_num[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "20", "30", "40", "50", "100", "150", "200", "300", "350", "400", "500", "600", "700", "746", "800", "900", "1000"};
+    static int combo_current_item_num = 9;
     ImGui::SetNextItemWidth(100.0f);
     ImGui::Combo("Значений в пакете", &combo_current_item_num, combo_items_num, IM_ARRAYSIZE(combo_items_num));
 
