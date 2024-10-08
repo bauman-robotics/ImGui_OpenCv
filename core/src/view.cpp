@@ -30,6 +30,8 @@ void ShowCtrlWindow() {
         View_Group_Socket_Data_Ctrl();
         ImGui::SameLine();
         View_Group_9_Socket_Logs();
+        ImGui::SameLine();
+        View_Group_Line1_P4_Filter_Ctrl();
         View_Group_Socket_Plot();
     }    
 

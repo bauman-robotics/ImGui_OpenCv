@@ -38,7 +38,8 @@ void View_Group_Socket_Port_Ctrl(void) {
     
     ImGui::Text("Port:");
     ImGui::SameLine();
-    ImGui::InputInt("##", &var.socket.port);
+    //ImGui::InputInt("##", &var.socket.port);
+    ImGui::InputInt("##", &var.socket.port, 0, 0, ImGuiInputTextFlags_CharsDecimal);
 
     //========================================
 

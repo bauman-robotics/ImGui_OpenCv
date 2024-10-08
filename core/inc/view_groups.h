@@ -16,3 +16,4 @@ void View_Cv_Group_2();
 void Clear_Plot_Serial_Data(); 
 void Clear_Socket_Data();
 void View_Group_9_Socket_Logs();
+void View_Group_Line1_P4_Filter_Ctrl();

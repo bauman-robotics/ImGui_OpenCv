@@ -54,11 +54,18 @@ typedef struct {
 //================================
 typedef struct {  
     //==================     
-    char message[10];
+    char message[50];
     atomic<bool> need_to_be_sended;  
     //==================   
 } socket_send;
 //================================
+typedef struct {
+    int order_V;
+    int order_I;
+    bool enabled;
+} filter_t;
+//================================
+
 typedef struct {  
     //==================     
     string data_prefix;
@@ -77,6 +84,8 @@ typedef struct {
     int val_in_packet;
     int packet_period_ms;
 
+    filter_t filter;
+
 } socket_s;
 //================================
 
@@ -93,6 +102,7 @@ typedef struct {
     int groupSize_x;
     int groupSize_y;
 } Mouse_Type;
+
 //================================
 
 // typedef struct {
@@ -122,6 +132,7 @@ typedef struct {
     //==================
     Log_File_Type log;
     Mouse_Type mouse;
+    
   //  Debug_Type debug;
 
 } variables;

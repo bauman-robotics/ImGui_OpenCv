@@ -17,17 +17,30 @@ void View_Group_Socket_Data_Ctrl() {
         sprintf(var.socket.send.message, "%s", "Red"); 
         var.socket.send.need_to_be_sended.store(1);
     }
+
+    ImGui::SameLine();
+
     if (ImGui::RadioButton("Sin test", selected_radio == 1)) { 
         selected_radio = 1; 
       
         sprintf(var.socket.send.message, "%s", "Green");         
         var.socket.send.need_to_be_sended.store(1); 
     }
-    if (ImGui::RadioButton("in226 Get Voltage", selected_radio == 2)) {
+
+    if (ImGui::RadioButton("Voltage", selected_radio == 2)) {
         selected_radio = 2; 
         sprintf(var.socket.send.message, "%s", "Blue");          
         var.socket.send.need_to_be_sended.store(1);      
     }
+    
+    ImGui::SameLine();
+    
+    if (ImGui::RadioButton("Current", selected_radio == 3)) {
+        selected_radio = 3; 
+        sprintf(var.socket.send.message, "%s", "Current");          
+        var.socket.send.need_to_be_sended.store(1);      
+    }
+
 
     static const char* combo_items[] = {"5", "10", "15", "20", "25", "50", "100", "200", "500", "1000", "2000", "3000", "5000" };
     //=========================================
@@ -35,7 +48,7 @@ void View_Group_Socket_Data_Ctrl() {
     var.socket.packet_period_ms = 10;
     //=========================================
     // Устанавливаем ширину следующего элемента. Например, 200.0f пикселей.
-    ImGui::SetNextItemWidth(100.0f);
+    ImGui::SetNextItemWidth(70.0f);
     ImGui::Combo("Период пакетов, ms", &combo_current_item, combo_items, IM_ARRAYSIZE(combo_items));
 
     if (ImGui::IsItemEdited())
@@ -55,7 +68,7 @@ void View_Group_Socket_Data_Ctrl() {
     static int combo_current_item_num = 9;
     var.socket.val_in_packet = 10;
     //=========================================
-    ImGui::SetNextItemWidth(100.0f);
+    ImGui::SetNextItemWidth(70.0f);
     ImGui::Combo("Значений в пакете", &combo_current_item_num, combo_items_num, IM_ARRAYSIZE(combo_items_num));
 
     if (ImGui::IsItemEdited())

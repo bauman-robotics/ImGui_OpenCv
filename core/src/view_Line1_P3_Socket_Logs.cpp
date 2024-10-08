@@ -23,14 +23,14 @@ namespace fs = filesystem;
 
 void View_Group_9_Socket_Logs() {    
 
-    //=== Шестая группа Управление ком-портом =================
+    ImGui::BeginChild("Socket_Logs", ImVec2(L1_P3_SOCKET_LOGS_CTRL_W, L1_P3_SOCKET_LOGS_CTRL_H), true);
+
+    ImGui::Text("Logs");
 
     static int combo_current_item = 0;
     ImVec4 activeColor = ImVec4(0.0f, 0.5f, 1.0f, 1.0f); // Цвет для активной кнопки
     ImVec4 defaultColor = ImGui::GetStyleColorVec4(ImGuiCol_Button); // Цвет по умолчанию
 
-    ImGui::BeginChild("Socket_Logs", ImVec2(L1_P3_SOCKET_LOGS_CTRL_W, L1_P3_SOCKET_LOGS_CTRL_H), true);
-    ImGui::Text("Logs");
 
     ImGui::PushStyleColor(ImGuiCol_Button, var.log.log_Is_Started ? activeColor : defaultColor);
 

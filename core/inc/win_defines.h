@@ -23,7 +23,7 @@
 #define EMPTY_H (8)
 
 //=== LINE 1 ========
-#define L1_W (280)
+#define L1_W (230)
 #define L1_H (150)
 
 #define L1_P1_SOCKET_PORT_CTRL_W  (L1_W)
@@ -32,8 +32,14 @@
 #define L1_P2_SOCKET_DATA_CTRL_W  (L1_W)
 #define L1_P2_SOCKET_DATA_CTRL_H  (L1_H)
 
-#define L1_P3_SOCKET_LOGS_CTRL_W  (MAIN_WIN_WIDTH - EMPTY_W * 4 - L1_W * 2)
+#define L1_P3_SOCKET_LOGS_CTRL_W  (L1_W) 
+// MAIN_WIN_WIDTH - EMPTY_W * 4 - L1_W * 2)
 #define L1_P3_SOCKET_LOGS_CTRL_H  (L1_H)
+
+#define L1_P4_SOCKET_FILTER_CTRL_W (MAIN_WIN_WIDTH - EMPTY_W * 5 - L1_W * 3)
+#define L1_P4_SOCKET_FILTER_CTRL_H (L1_H)
+
+
 //====================
 #define L2_P1_SOCKET_PLOT_W       (MAIN_WIN_WIDTH - EMPTY_W *2)
 #define L2_P1_SOCKET_PLOT_H       (MAIN_WIN_HIGH - L1_H - EMPTY_H * 3)
