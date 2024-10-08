@@ -1,16 +1,16 @@
 #include "main.h"
+#include "win_defines.h"
 
-
-void View_Group_4() {
+void View_Group_Mouse_Plot() {
 
     ImGuiIO& io = ImGui::GetIO();
     //ImGui::BeginChild("Group 4", ImVec2(865, 270), true);
-
+    var.mouse.groupSize_x = MOUSE_PLOT_W;
     ImVec2 groupSize = ImVec2(var.mouse.groupSize_x, var.mouse.groupSize_y); // Начальный размер
-    ImGui::BeginChild("Group 4", groupSize, true);
+    ImGui::BeginChild("Mouse_Plot", groupSize, true);
 
 
-    ImGui::Text("Группа 4");
+    ImGui::Text("Mouse_Plot");
 
     static std::vector<float> y_coords;
         // Проверка на валидность координат мыши
@@ -20,7 +20,7 @@ void View_Group_4() {
 
     if (var.mouse.mouse_chart_enable) {
 
-        var.mouse.groupSize_y = 270;
+        var.mouse.groupSize_y = MOUSE_PLOT_H_ON;
 
         // Добавление текущей Y координаты мыши в вектор только если координаты валидны
         if (mouse_valid) {
@@ -81,7 +81,7 @@ void View_Group_4() {
             y_coords.clear();
         }
     } else {
-        var.mouse.groupSize_y = 70;
+        var.mouse.groupSize_y = MOUSE_PLOT_H_OFF;
         
         ImGui::Checkbox("Mouse Chart Enable", &checkbox);
 

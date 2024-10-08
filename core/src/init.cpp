@@ -3,6 +3,7 @@
 #include "ini_file.h"
 #include "cpu_usage.h"
 #include "defines.h"
+#include "win_defines.h"
 
 // Прототипы функций
 int InitGLFWAndImGui(GLFWwindow** window);
@@ -126,9 +127,9 @@ int InitGLFWAndImGui(GLFWwindow** window) {
     // Установить флаг для запрета изменения размера окна
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-   int win_width = 880;
+   int win_width = ALL_WIN_WIDTH;
 
-    *window = glfwCreateWindow(win_width, 736, "ImGui Demo", NULL, NULL);
+    *window = glfwCreateWindow(win_width, ALL_WIN_HIGH, "ImGui Demo", NULL, NULL);
     if (!*window) {
         glfwTerminate();
         return -1;

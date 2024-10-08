@@ -4,19 +4,20 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include "win_defines.h"
 //======================================
 
 
 
 //======================================
 
-void View_Group_6(void) {    
+void View_Group_Serial_Ctrl(void) {    
 
     //=== Шестая группа Управление ком-портом =================
 
     static int combo_current_item = 0;
 
-    ImGui::BeginChild("Group 6", ImVec2(280, 270), true);
+    ImGui::BeginChild("Group 6", ImVec2(SERIAL_CTRL_W, SERIAL_CTRL_H), true);
 
     // Установка ширины комбобокса
     ImGui::SetNextItemWidth(150.0f); // Установите желаемую ширину комбобокса

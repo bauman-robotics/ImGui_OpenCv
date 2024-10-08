@@ -20,10 +20,11 @@ const std::string DATA_PREFIX = "f";
 
 const uint16_t BYNARY_PACKET_INT_KEY   = 2255;
 const uint16_t BYNARY_PACKET_FLOAT_KEY = 2233;
-const uint16_t FLOAT_PRECISION   = 0;
+const uint16_t FLOAT_PRECISION   = 3;
 
 //#define MOUSE_CHART_ENABLE
 
 #define SOCKET_MSG_BUF_SIZE (1600)
 #define MAX_HEX_VALS_IN_PACKET (700)
 
+#define DISABLE_MOUSE_TEAM

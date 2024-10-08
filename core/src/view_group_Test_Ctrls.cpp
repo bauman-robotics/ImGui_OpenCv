@@ -1,13 +1,14 @@
 #include "main.h"
+#include "win_defines.h"
 
-void View_Group_1() {
+void View_Group_Test_Ctrls() {
 
     static std::vector<std::string> items1 = { "Item 1", "Item 2", "Item 3" };
     static std::vector<const char*> items1_cstr;
     static int item_current1 = 0;
 
-    ImGui::BeginChild("Group 1", ImVec2(300, 150), true);
-    ImGui::Text("Группа 1");
+    ImGui::BeginChild("Test_Ctrls", ImVec2(TEST_GROUP_W, TEST_GROUP_H), true);
+    ImGui::Text("Test_Ctrls");
 
     // Кнопка для добавления элемента
     if (ImGui::Button("Добавить элемент"))

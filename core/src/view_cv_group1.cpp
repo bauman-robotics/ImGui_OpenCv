@@ -1,8 +1,9 @@
 #include "main.h"
+#include "win_defines.h"
 
 int View_Cv_Group_1(cv::VideoCapture & cap) {
 
-    ImGui::BeginChild("Group 1", ImVec2(300, 150), true);
+    ImGui::BeginChild("Group 1", ImVec2(CV1_GROUP_W, CV1_GROUP_H), true);
    // ImGui::Text("Группа 1");
 
     // Добавляем кнопки управления

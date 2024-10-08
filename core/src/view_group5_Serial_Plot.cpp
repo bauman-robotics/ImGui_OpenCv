@@ -1,7 +1,7 @@
 #include "main.h"
 #include "uart.h"
 #include <atomic>
-
+#include "win_defines.h"
 
 static std::atomic<double> smoothed_packets_per_second(0.0);
 static std::atomic<double> smoothed_val_data_per_second(0.0);
@@ -15,13 +15,13 @@ void Clear_Plot_Serial_Data();
 
 //======================================
 
-void View_Group_5(void) {    
+void View_Group_Serial_Plot(void) {    
 
     //=== Пятая группа графиком данных из последовательного порта работающего в отдельном потоке =================
 
     
-    ImGui::BeginChild("Group 5", ImVec2(575, 270), true);
-    ImGui::Text("Группа 5 - Данные из последовательного порта");
+    ImGui::BeginChild("Serial_Plot", ImVec2(SERIAL_PLOT_W, SERIAL_PLOT_H), true);
+    ImGui::Text("Данные из последовательного порта");
 
     std::vector<int> new_parser_data;
     // Парсинг данных

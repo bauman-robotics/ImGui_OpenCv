@@ -56,7 +56,7 @@ typedef struct {
     //==================     
     char message[10];
     atomic<bool> need_to_be_sended;  
-    //==================    
+    //==================   
 } socket_send;
 //================================
 typedef struct {  
@@ -74,6 +74,9 @@ typedef struct {
     bool hex_receive;
     bool chart_enable;
     vector<float> data_f;
+    int val_in_packet;
+    int packet_period_ms;
+
 } socket_s;
 //================================
 

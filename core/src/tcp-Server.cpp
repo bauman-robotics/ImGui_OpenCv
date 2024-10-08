@@ -552,13 +552,13 @@ int Socket_Close() {
 
 double GetPacketsPerSecond_S() {
     
-    return packets_per_second;
+    return packets_per_second.load();
 }
 //================================================
 
 double Get_Val_Data_PerSecond_S() {
     
-    return val_data_per_second;
+    return val_data_per_second.load();
 }
 
 //================================================

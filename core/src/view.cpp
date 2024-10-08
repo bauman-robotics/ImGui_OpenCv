@@ -2,56 +2,68 @@
 #include "view.h"
 #include "uart.h"
 #include "view_groups.h"
-
+#include "defines.h"
+#include "win_defines.h"
 
 void ShowCtrlWindow() {
 
     // Установка позиции и размера окна
-    ImGui::SetNextWindowPos(ImVec2(0, 38), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(880, 736), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(MAIN_WIN_X_POS, MAIN_WIN_Y_POS), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(MAIN_WIN_WIDTH, MAIN_WIN_HIGH), ImGuiCond_Always);
 
     // Начало нового окна
     ImGui::Begin("Ctrl Window", NULL, ImGuiWindowFlags_NoMove | 
                                       ImGuiWindowFlags_NoResize |
                                       ImGuiWindowFlags_NoTitleBar);
-
+    #ifndef DISABLE_MOUSE_TEAM
     //=== Первая группа с рамкой ========================================================================
-    View_Group_1();
+    View_Group_Test_Ctrls();
 
     // Разделитель между группами
     ImGui::SameLine();
+    #endif 
+   
 
-    //=== Вторая группа с рамкой ========================================================================
-
-    View_Group_2();
-
-    if (var.mouse.mouse_chart_enable) {
-        // Разделитель между группами
+    if (var.ctrl_mode) {        
+        View_Group_Socket_Port_Ctrl();
         ImGui::SameLine();
+        View_Group_Socket_Data_Ctrl();
+        ImGui::SameLine();
+        View_Group_9_Socket_Logs();
+        View_Group_Socket_Plot();
+    }    
 
-        //=== Третья группа с рамкой ========================================================================
 
-        View_Group_3();
+    #ifndef DISABLE_MOUSE_TEAM
+        if (var.mouse.mouse_chart_enable) {
+            // Разделитель между группами
+            ImGui::SameLine();
 
-    }
+            //=== Третья группа с рамкой ========================================================================
 
-    //=== Четвертая группа с графиком координат мыши ====================================================
+            View_Group_Mouse_Ctrl();
+        }
 
-    View_Group_4();
+        //=== Четвертая группа с графиком координат мыши ====================================================
+
+        View_Group_Mouse_Plot();
+    #else
+
+    #endif 
 
     //=== Пятая и шестая группы с листбоксом данных из последовательного порта =================
     if (var.com_port_mode) {
-        View_Group_5();
+        View_Group_Serial_Plot();
         ImGui::SameLine();
-        View_Group_6();
+        View_Group_Serial_Ctrl();
     }
 
     //=== Седьмая и восьмая группы с листбоксом данных из socket порта =================
-    if (var.ctrl_mode) {
-        View_Group_7();
-        ImGui::SameLine();
-        View_Group_8();
-    }    
+    // if (var.ctrl_mode) {
+    //     //View_Group_Socket_Plot();
+    //     //ImGui::SameLine();
+    //     //View_Group_Socket_Port_Ctrl();
+    // }    
     // Конец окна
     ImGui::End();
 }

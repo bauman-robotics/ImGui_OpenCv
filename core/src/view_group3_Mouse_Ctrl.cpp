@@ -1,9 +1,10 @@
 #include "main.h"
+#include "win_defines.h"
 
-void View_Group_3() {
+void View_Group_Mouse_Ctrl() {
 
-    ImGui::BeginChild("Group 3", ImVec2(250, 150), true);
-    ImGui::Text("Группа 3");
+    ImGui::BeginChild("Mouse_Ctrl", ImVec2(MOUSE_CTRL_W, MOUSE_CTRL_H), true);
+    ImGui::Text("Mouse_Ctrl");
 
     ImGuiIO& io = ImGui::GetIO();
     static float wheel_rotation = 0.0f;

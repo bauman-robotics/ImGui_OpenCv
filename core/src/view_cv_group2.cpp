@@ -1,10 +1,11 @@
 #include "main.h"
 #include "init.h"
 #include "defines.h"
+#include "win_defines.h"
 
 void View_Cv_Group_2() {
 
-    ImGui::BeginChild("Group 2", ImVec2(300, 150), true);
+    ImGui::BeginChild("Group 2", ImVec2(CV2_GROUP_W, CV2_GROUP_H), true);
     ImGui::Text("Группа 2");
 
     // Радиокнопки и комбобокс

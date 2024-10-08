@@ -1,10 +1,11 @@
 #include "main.h"
 #include "defines.h"
+#include "win_defines.h"
 
 void Menu_Item(void) {
     // Установка позиции и размера окна
-    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-    ImGui::SetNextWindowSize(ImVec2(880, 38), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2(MAIN_MENU_POS_W, MAIN_MENU_POS_H), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(MAIN_MENU_W, MAIN_MENU_H), ImGuiCond_Always);
 
     // Начало нового окна
     ImGui::Begin("Menu Window", NULL, ImGuiWindowFlags_NoMove | 
