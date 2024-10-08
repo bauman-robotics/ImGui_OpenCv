@@ -29,6 +29,10 @@ using namespace std;
 void Pars_Data(vector<float>); 
 
 void Clear_Socket_Data();
+void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data); 
+std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold); 
+std::vector<float> movingAverage(const std::vector<float>& input, size_t windowSize);
+std::vector<float> medianFilter(const std::vector<float>& input, size_t windowSize);
 //==================================================================================
 
 void View_Group_Socket_Plot(void) {    
@@ -193,8 +197,8 @@ void View_Group_Socket_Plot(void) {
         // Отображение графика
         if (graph_type == 0) {
             // Рисуем график, используя доступную ширину и заданную высоту
-            ImGui::PlotLines("Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, y_min, y_max, ImVec2(available_size.x, plot_height));
-
+            //ImGui::PlotLines()"Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, y_min, y_max, ImVec2(available_size.x, plot_height));
+            plotData(y_min, y_max, ImVec2(available_size.x, plot_height), var.socket.data_f);
         } else if (graph_type == 1) {
             ImGui::PlotHistogram("Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
         } else if (graph_type == 2) {
@@ -263,3 +267,94 @@ void Pars_Data(vector<float>) {
     }
 }  
 //==================================================================================
+
+// Функция для децимации вектора в два раза
+std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold) {
+    std::vector<float> output;
+    if (input.size() > decimationThreshold) {
+        for (size_t i = 0; i < input.size(); i += 2) {
+            output.push_back((input[i] + input[i + 1]) / 2.0f);
+        }
+    } else {
+        output = input;
+    }
+    return output;
+}
+
+// std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold) {
+//   std::vector<float> output;
+//   if (input.size() > decimationThreshold) {
+//     for (size_t i = 0; i < input.size(); i += 2) {
+//       output.push_back(std::max(input[i], input[i + 1]));
+//     }
+//   } else {
+//     output = input;
+//   }
+//   return output;
+// }
+
+
+// std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold) {
+//     std::vector<float> output;
+//     if (input.size() > decimationThreshold) {
+//         if (input.size() >= 4) {
+//             for (size_t i = 0; i < input.size(); i += 4) {
+//             float sum = input[i] + input[i + 1] + input[i + 2] + input[i + 3];
+//             output.push_back(sum / 4.0f);
+//             }
+//         }
+//     }  else {
+//         output = input;
+//     }
+//   return output;
+// }
+//==================================================================================
+
+
+void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data) {
+    // Проверяем, нужно ли децимировать данные
+    if (data.size() > 1 * available_size.x) {
+        data = decimateVector(data, 2 * available_size.x);        
+    }
+
+    //size_t windowSize = static_cast<size_t>(2 * available_size.x / data.size());
+    //data = movingAverage(data, windowSize);
+    //data = medianFilter(data, windowSize);
+
+    ImGui::PlotLines("Socket", &data[0], data.size(), 0, NULL, y_min, y_max, ImVec2(available_size.x, available_size.y));
+}
+//==================================================================================
+
+
+// Функция для вычисления среднего скользящего
+std::vector<float> movingAverage(const std::vector<float>& input, size_t windowSize) {
+    std::vector<float> output;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (i + windowSize <= input.size()) {
+            float sum = 0.0f;
+            for (size_t j = 0; j < windowSize; ++j) {
+                sum += input[i + j];
+            }
+            output.push_back(sum / windowSize);
+        } else {
+            break; // Остановка, если окно выходит за границы вектора
+        }
+    }
+    return output;
+}
+//==================================================================================
+
+// Функция для медианного фильтрования
+std::vector<float> medianFilter(const std::vector<float>& input, size_t windowSize) {
+    std::vector<float> output;
+    for (size_t i = 0; i < input.size(); ++i) {
+        if (i + windowSize <= input.size()) {
+            std::vector<float> window(input.begin() + i, input.begin() + i + windowSize);
+            std::sort(window.begin(), window.end());
+            output.push_back(window[windowSize / 2]);
+        } else {
+            break; // Остановка, если окно выходит за границы вектора
+        }
+    }
+    return output;
+}
