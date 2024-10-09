@@ -197,8 +197,8 @@ void View_Group_Socket_Plot(void) {
         // Отображение графика
         if (graph_type == 0) {
             // Рисуем график, используя доступную ширину и заданную высоту
-            //ImGui::PlotLines()"Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, y_min, y_max, ImVec2(available_size.x, plot_height));
-            plotData(y_min, y_max, ImVec2(available_size.x, plot_height), var.socket.data_f);
+            ImGui::PlotLines("Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, y_min, y_max, ImVec2(available_size.x, plot_height));
+            //plotData(y_min, y_max, ImVec2(available_size.x, plot_height), var.socket.data_f);
         } else if (graph_type == 1) {
             ImGui::PlotHistogram("Socket", var.socket.data_f.data(), var.socket.data_f.size(), 0, NULL, FLT_MAX, FLT_MAX,  ImVec2(available_size.x, plot_height));
         } else if (graph_type == 2) {
