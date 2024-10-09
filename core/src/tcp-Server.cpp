@@ -345,8 +345,10 @@ vector<float> parseSocketData_Float(const string& prefix) {
 
 
         if (var.log.log_Is_Started) {
-
-            Add_Str_To_Log_File_ASCII(local_processing_buffer); 
+            
+            #ifndef LOG_ONE_VAL_TO_LINE
+                Add_Str_To_Log_File_ASCII(local_processing_buffer); 
+            #endif 
         }
 
 
@@ -400,6 +402,13 @@ vector<float> parseSocketData_Float(const string& prefix) {
 
 // for float data 
 vector<float> parseBinarySocketData_Float() {
+    // active_buffer
+    // processing_buffer
+    // local_processing_buffer
+    //==== output ====
+    // var.socket.data_f 
+    // results -- only for logs 
+
     const uint16_t HEADER_SIZE = 4;
     vector<float> results;
     size_t pos = 0;
@@ -625,3 +634,4 @@ void Check_Socket_Connect() {
         }
     }    
 }
+

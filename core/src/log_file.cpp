@@ -14,6 +14,10 @@
 #include <unistd.h> // для access()
 #include <sys/stat.h> // для stat()
 
+#include <vector>
+#include <iomanip>  // Для std::fixed и std::setprecision
+
+
 using namespace std;
 namespace fs =filesystem;
 
@@ -100,19 +104,27 @@ void Add_Str_To_Log_File_ASCII(const vector<byte>& vec_byte_packet) {
 
 // Функция для добавления строки в лог-файл
 void Add_Str_To_Log_File_HEX_Float(const vector<float>& vec_float_packet) {
+  #ifndef LOG_ONE_VAL_TO_LINE
     string str;
     str = Vector_Float_To_String(vec_float_packet, FLOAT_PRECISION);
+  #endif
+  // Открываем файл для добавления строки в конец
+  ofstream file(var.log.curr_Log_File_Name, ios::app);  // Открываем файл в режиме добавления
 
-    // Открываем файл для добавления строки в конец
-    ofstream file(var.log.curr_Log_File_Name, ios::app);  // Открываем файл в режиме добавления
-
-    if (file.is_open()) {
+  if (file.is_open()) {
+      #ifdef LOG_ONE_VAL_TO_LINE
+      // Записываем каждое значение на новой строке
+      for (float value : vec_float_packet) {
+          file << value << endl;
+      }
+      #else 
         // Записываем строку в файл
         file << str << endl;
-        file.close();
-    } else {
-        cerr << "Ошибка при открытии файла: " << var.log.curr_Log_File_Name << endl;
-    }
+      #endif 
+      file.close();
+  } else {
+      cerr << "Ошибка при открытии файла: " << var.log.curr_Log_File_Name << endl;
+  }
 }
 //====================================================================
 
@@ -145,11 +157,7 @@ bool Open_Folder(const string& folder_name) {
 }
 //====================================================================
 
-#include <vector>
-#include <sstream>
-#include <iomanip>  // Для std::fixed и std::setprecision
 
-using namespace std;
 
 string Vector_Float_To_String(const vector<float>& vector, int precision) {
     stringstream ss;
@@ -165,3 +173,4 @@ string Vector_Float_To_String(const vector<float>& vector, int precision) {
     
     return ss.str();  // Возвращаем строку из строкового потока
 }
+

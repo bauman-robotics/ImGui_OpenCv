@@ -26,7 +26,7 @@ extern atomic<double> smoothed_val_data_per_second_s;
 
 using namespace std;
 
-void Pars_Data(vector<float>); 
+void Pars_Data_And_Binary_Log(); 
 
 void Clear_Socket_Data();
 void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data); 
@@ -44,7 +44,7 @@ void View_Group_Socket_Plot(void) {
     //ImGui::Text("Данные из Socket");
 
     if (!freeze_en) {
-        Pars_Data(y_coords);
+        Pars_Data_And_Binary_Log();
     }
 
     //====  График значений ===========
@@ -244,18 +244,28 @@ void Clear_Socket_Data() {
 }
 //==================================================================================
 
-void Pars_Data(vector<float>) {
+void Pars_Data_And_Binary_Log() {
 
     // Парсинг данных
     if (var.socket.init_socket_done) {
 
         if (!var.socket.hex_receive) {
 
-            y_coords = parseSocketData_Float(var.socket.data_prefix);
+           y_coords = parseSocketData_Float(var.socket.data_prefix);
+           #ifdef LOG_ONE_VAL_TO_LINE
+                if (var.log.log_Is_Started) {
+                    if (y_coords.size()) {                    
+                   
+                        Add_Str_To_Log_File_HEX_Float(y_coords);
+                     }
+                } 
+           #endif 
 
         } else {
-            
-            y_coords =  parseBinarySocketData_Float();
+            // y_coords - only for logs 
+            //==== output ====
+            // var.socket.data_f 
+            y_coords =  parseBinarySocketData_Float();  
 
             if (var.log.log_Is_Started) {
                 if (y_coords.size()) {                    

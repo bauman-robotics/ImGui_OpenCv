@@ -64,6 +64,12 @@ typedef struct {
     int order_I;
     bool enabled;
 } filter_t;
+
+//================================
+typedef struct {
+    filter_t filter;
+    int16_t i_lim_mA;
+} ina226_t;
 //================================
 
 typedef struct {  
@@ -82,9 +88,8 @@ typedef struct {
     bool chart_enable;
     vector<float> data_f;
     int val_in_packet;
-    int packet_period_ms;
-
-    filter_t filter;
+    int packet_period_ms;    
+    ina226_t ina226;
 
 } socket_s;
 //================================

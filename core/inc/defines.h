@@ -28,3 +28,4 @@ const uint16_t FLOAT_PRECISION   = 3;
 #define MAX_HEX_VALS_IN_PACKET (700)
 
 #define DISABLE_MOUSE_TEAM
+#define LOG_ONE_VAL_TO_LINE 
