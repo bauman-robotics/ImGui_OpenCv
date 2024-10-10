@@ -41,6 +41,14 @@ void View_Group_Socket_Data_Ctrl() {
         var.socket.send.need_to_be_sended.store(1);      
     }
 
+    ImGui::SameLine();
+    
+    if (ImGui::RadioButton("Pow.", selected_radio == 4)) {
+        selected_radio = 4; 
+        sprintf(var.socket.send.message, "%s", "Power");          
+        var.socket.send.need_to_be_sended.store(1);      
+    }
+
 
     static const char* combo_items[] = {"5", "10", "15", "20", "25", "50", "100", "200", "500", "1000", "2000", "3000", "5000" };
     //=========================================
