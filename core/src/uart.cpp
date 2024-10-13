@@ -399,31 +399,6 @@ void Stop_Serial_Thread() {
 //================================================
 
 // Функция чтения данных из COM-порта
-// void ReadSerialData() {
-//     char buf[256];
-//     auto start_time = chrono::steady_clock::now();
-//     while (keep_running) {
-
-//         // Чтение данных из COM-порта
-//         int n = read(serial_fd, buf, sizeof(buf) - 1);
-//         if (n > 0) {
-//             #ifdef DEBUG_COUT
-//                 cout << "___________________________new_Packet" << endl;
-//             #endif 
-//             buf[n] = '\0';
-//             string line(buf);
-//             lock_guard<mutex> data_lock(data_mutex);
-//             serial_data.push_back(line);
-//             packet_count++;
-//         } else if (n < 0) {
-//             cerr << "Ошибка чтения из последовательного порта" << endl;
-//             break;
-//         }
-//     }
-// }
-
-
-// Функция чтения данных из COM-порта
 void ReadSerialData() {
     //char buf[PORT_MSG_BUF_SIZE];
     auto start_time = chrono::steady_clock::now();
@@ -484,6 +459,7 @@ int FindStringIndex(const vector<const char*>& list, const string& target) {
     }
     return -1; // Возвращаем -1, если строка не найдена
 }
+//================================================
 
 // for float data 
 vector<float> parseBinary_Com_PortData_Float() {
