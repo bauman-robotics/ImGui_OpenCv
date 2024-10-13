@@ -352,7 +352,8 @@ vector<float> parseSocketData_Float(const string& prefix) {
         }
 
 
-        regex pattern(prefix + R"(\s+(\d+))");
+        //regex pattern(prefix + R"(\s+(\d+))");
+        regex pattern(prefix + R"(\s+(\d+(\.\d+)?))");  // Для плавающей точки
 
         string strData;
         for (const auto& byte : local_processing_buffer) {

@@ -483,3 +483,110 @@ int FindStringIndex(const vector<const char*>& list, const string& target) {
     }
     return -1; // Возвращаем -1, если строка не найдена
 }
+
+// for float data 
+vector<float> parseBinary_Com_PortData_Float() {
+    // active_buffer
+    // processing_buffer
+    // local_processing_buffer
+    //==== output ====
+    // var.socket.data_f 
+    // results -- only for logs 
+
+    const uint16_t HEADER_SIZE = 4;
+    vector<float> results;
+    size_t pos = 0;
+
+    // Локальный буфер для обработки
+    vector<byte> local_processing_buffer;
+
+    if (data_ready.load()) {
+        {
+            lock_guard<mutex> lock(buffer_mutex);
+            // Меняем буферы: активный буфер становится обрабатываемым, и наоборот
+            swap(active_buffer, processing_buffer);
+            local_processing_buffer = move(*processing_buffer); // Перемещаем данные в локальный буфер
+            processing_buffer->clear(); // Очищаем буфер для дальнейшего использования
+            data_ready.store(false);  // Сбрасываем флаг
+        }
+
+        // Теперь данные находятся в локальном буфере, и мы можем их обрабатывать без мьютекса
+        if (!local_processing_buffer.empty()) {
+            while (pos < local_processing_buffer.size()) {
+                // Читаем заголовок пакета
+                if (local_processing_buffer.size() - pos < HEADER_SIZE) {
+                    break;  // Недостаточно данных для чтения заголовка
+                }
+
+                BinPacketHeader header;
+
+                // Читаем первые 2 байта для типа пакета
+                header.type.low = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.type.hi = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.type.val = (static_cast<uint16_t>(header.type.hi) << 8) | header.type.low;
+
+                // Читаем следующие 2 байта для полного размера пакета
+                header.full_packet_size.low = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.full_packet_size.hi = static_cast<uint8_t>(local_processing_buffer.at(pos));
+                pos++;
+                header.full_packet_size.val = (static_cast<uint16_t>(header.full_packet_size.hi) << 8) | header.full_packet_size.low;
+
+                // Проверяем, совпадает ли тип пакета с целевым
+                // === Если данные в формате int ==============================                    
+                if (header.type.val == BYNARY_PACKET_INT_KEY) {
+
+
+                    // if (header.full_packet_size.val < HEADER_SIZE || 
+                    //     pos + header.full_packet_size.val > processing_buffer->size()) {
+                    //     // Недостаточно данных или некорректный размер пакета
+                    //     break;
+                    // }
+
+                    // Проверяем, хватает ли данных в векторе для чтения тела пакета
+                    if (pos + (header.full_packet_size.val - HEADER_SIZE) <= local_processing_buffer.size()) {
+                        // Читаем тело пакета и добавляем его в выходной вектор
+                        for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += 2) {
+                            int16_t value = (static_cast<int16_t>(local_processing_buffer.at(pos + i + 1)) << 8)
+                                            | static_cast<int16_t>(local_processing_buffer.at(pos + i));
+                            results.push_back(static_cast<float>(value));  // for log
+                            var.socket.data_f.push_back(static_cast<float>(value));
+                            val_data_count++;
+                        }
+                        pos += (header.full_packet_size.val - HEADER_SIZE);
+                    } else {
+                        // Недостаточно данных для чтения полного пакета
+                        break;
+                    }
+                // === Если данные в формате float ==============================    
+                } else if (header.type.val == BYNARY_PACKET_FLOAT_KEY) {
+                    // Проверяем, хватает ли данных в векторе для чтения тела пакета
+                    if (pos + (header.full_packet_size.val - HEADER_SIZE) <= local_processing_buffer.size()) {
+                        // Читаем тело пакета и добавляем его в выходной вектор
+                        for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += sizeof(float)) {
+                            // Копируем байты float из буфера
+                            float value;
+                            std::memcpy(&value, &local_processing_buffer[pos + i], sizeof(float));
+                            
+                            results.push_back(value);  // for log
+                            var.socket.data_f.push_back(value);
+                            val_data_count++;
+                        }
+                        pos += (header.full_packet_size.val - HEADER_SIZE);
+                    } else {
+                        // Недостаточно данных для чтения полного пакета
+                        break;
+                    }      
+                }  else {
+                    // Пропускаем пакет с неподходящим типом
+                    pos += header.full_packet_size.val - HEADER_SIZE;
+                }
+            }
+        }
+    }
+
+    return results;
+}
+//===========================================================================================

@@ -8,6 +8,7 @@
 #include <string>
 #include "defines.h"
 #include "win_defines.h"
+#include "uart.h"
 
 #include <deque>
 #include <algorithm>
@@ -286,7 +287,7 @@ static void Pars_Data_And_Binary_Log() {
 static void Pars_Data_And_Binary_Log_Com_port() {
 
     // Парсинг данных
-    //if (var.socket.init_socket_done) {
+    if (var.com_port.init_serial_done) {
 
         if (!var.socket.hex_receive) {
 
@@ -304,19 +305,18 @@ static void Pars_Data_And_Binary_Log_Com_port() {
             // y_coords - only for logs 
             //==== output ====
             // var.socket.data_f 
-            // y_coords =  parseBinarySocketData_Float();  
+            y_coords =  parseBinary_Com_PortData_Float();  
 
-            // if (var.log.log_Is_Started) {
-            //     if (y_coords.size()) {                    
+            if (var.log.log_Is_Started) {
+                if (y_coords.size()) {                    
                     
-            //         Add_Str_To_Log_File_HEX_Float(y_coords);
-            //     }
-            // } 
+                    Add_Str_To_Log_File_HEX_Float(y_coords);
+                }
+            } 
         }               
-    //}
+    }
 }  
 //==================================================================================
-
 
 
 
