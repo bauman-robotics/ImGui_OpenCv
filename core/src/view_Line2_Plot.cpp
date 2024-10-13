@@ -29,14 +29,14 @@ using namespace std;
 static void Pars_Data_And_Binary_Log(); 
 static void Pars_Data_And_Binary_Log_Com_port(); 
 
-void Clear_Socket_Data();
+void Clear_Socket_Com_Data();
 void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data); 
 std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold); 
 std::vector<float> movingAverage(const std::vector<float>& input, size_t windowSize);
 std::vector<float> medianFilter(const std::vector<float>& input, size_t windowSize);
 //==================================================================================
 
-void View_Group_Socket_Plot(void) {    
+void View_Group_Socket_Com_Plot(void) {    
 
     //=== Седьмая группа графиком данных из socket данных =================
 
@@ -77,8 +77,8 @@ void View_Group_Socket_Plot(void) {
             ImGui::EndDisabled();
         }
         if ((graph_type != old_graph_type) && (graph_type == 2)) {
-            Clear_Socket_Data();
-            cout << "Clear_Socket_Data  "  << endl;
+            Clear_Socket_Com_Data();
+            cout << "Clear_Socket_Com_Data  "  << endl;
             old_graph_type = graph_type;
         }
 
@@ -225,7 +225,7 @@ void View_Group_Socket_Plot(void) {
 
         // Кнопка для очистки графика
         if (ImGui::Button("Очистить график")) { 
-            Clear_Socket_Data();
+            Clear_Socket_Com_Data();
         }
         //================================
 
@@ -242,7 +242,7 @@ void View_Group_Socket_Plot(void) {
 }
 //==================================================================================
 
-void Clear_Socket_Data() {
+void Clear_Socket_Com_Data() {
     lock_guard<mutex> lock(data_mutex);
     //parsed_data.clear();
     var.socket.data_f.clear();

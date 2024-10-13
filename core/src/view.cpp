@@ -32,7 +32,7 @@ void ShowCtrlWindow() {
         View_Group_9_Socket_Logs();
         ImGui::SameLine();
         View_Group_Line1_P4_Filter_Ctrl();
-        View_Group_Socket_Plot();
+        View_Group_Socket_Com_Plot();
     }    
 
 
@@ -70,7 +70,7 @@ void ShowCtrlWindow() {
         View_Group_9_Socket_Logs();
         ImGui::SameLine();
         View_Group_Line1_P4_Filter_Ctrl();
-        View_Group_Socket_Plot();
+        View_Group_Socket_Com_Plot();
 
         //View_Group_Serial_Plot();
 
@@ -79,7 +79,7 @@ void ShowCtrlWindow() {
 
     //=== Седьмая и восьмая группы с листбоксом данных из socket порта =================
     // if (var.ctrl_mode) {
-    //     //View_Group_Socket_Plot();
+    //     //View_Group_Socket_Com_Plot();
     //     //ImGui::SameLine();
     //     //View_Group_Socket_Port_Ctrl();
     // }    

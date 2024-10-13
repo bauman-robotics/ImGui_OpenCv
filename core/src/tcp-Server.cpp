@@ -587,7 +587,7 @@ void Check_Socket_Connect() {
         }
 
         // Open
-        //Clear_Socket_Data();
+        //Clear_Socket_Com_Data();
         Socket_Server_Init(var.socket.port);
 
         //var.socket.have_to_be_open = 1;

@@ -50,7 +50,7 @@ void View_Group_Socket_Port_Ctrl(void) {
     ImGui::PushStyleColor(ImGuiCol_Button, var.socket.init_socket_done ? activeColor : defaultColor);
 
     if (ImGui::Button("       Open       ")) {
-        Clear_Socket_Data();
+        Clear_Socket_Com_Data();
         Socket_Server_Init(var.socket.port);
         
     }

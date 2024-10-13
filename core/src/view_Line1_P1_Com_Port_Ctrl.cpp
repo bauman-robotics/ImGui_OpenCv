@@ -57,12 +57,6 @@ void View_Group_Serial_Ctrl(void) {
         }        
         
     }
-
-    //=== ===========================================================================Temp =====    
-    if (!var.log.log_Is_Started) {
-
-        Create_Log_File();  // temp 
-    }
     //=================================================================================
 
     ImGui::PopStyleColor();
@@ -72,15 +66,7 @@ void View_Group_Serial_Ctrl(void) {
             CloseSerial();
         }
     }
-
-
     //========================================
-
-    // #ifdef BINARY_PACKET
-    //     static bool checkbox_hex = true;
-    // #else 
-    //     static bool checkbox_hex = false;
-    // #endif 
 
     static bool checkbox_hex;
 
@@ -113,7 +99,6 @@ void View_Group_Serial_Ctrl(void) {
     double current_packets_per_second = GetPacketsPerSecond();
     smoothed_packets_per_second.store(CalculateEMA(current_packets_per_second, smoothed_packets_per_second.load(), alpha));
 
-    cout << "current_packets_per_second " << current_packets_per_second << endl;
     // Использование stringstream для форматирования строки
     stringstream ss;
     ss << fixed << setprecision(2) << "Пакетов в секунду: " << setw(6) << smoothed_packets_per_second.load();

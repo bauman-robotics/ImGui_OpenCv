@@ -94,8 +94,6 @@ int InitSerial() {
     }
     Start_Serial_Thread();
 
-    Clear_Plot_Serial_Data();
-
     keep_running = true;
     var.com_port.init_serial_done = true;
     var.com_port.have_to_be_closed = false;
@@ -459,6 +457,19 @@ void ReadSerialData() {
             cerr << "Ошибка чтения из последовательного порта" << endl;
             break;
         }
+        //=== Send Cmd ========================================
+        if (var.socket.send.need_to_be_sended.load() == 1) {
+            var.socket.send.need_to_be_sended.store(0);
+
+            ssize_t bytesSent = write(serial_fd, var.socket.send.message, strlen(var.socket.send.message));
+            if (bytesSent < 0) {
+                perror("Ошибка отправки данных клиенту");
+            } else {
+                cout << "send to Client: " << var.socket.send.message << endl;
+            }      
+        }
+
+        //=====================================================
     }
 }
 //================================================
