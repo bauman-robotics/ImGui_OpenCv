@@ -44,6 +44,13 @@ int Init_All(GLFWwindow** window) {
 
     #ifdef BINARY_PACKET
         var.socket.hex_receive = 1;    
+
+        // if (var.ctrl_mode) { //  Socket 
+        //     var.socket.hex_receive = 1; 
+        // }
+        // else if (var.com_port_mode) {
+        //     var.socket.hex_receive = 0;         
+        // }   
         var.socket.send.need_to_be_sended.store(1);     
         sprintf(var.socket.send.message, "%s", "HEX");       
     #else 

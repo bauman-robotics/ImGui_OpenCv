@@ -237,7 +237,7 @@ vector<float> parseComPortData_Float(const string& prefix) {
         }
 
 
-        //regex pattern(prefix + R"(\s+(\d+))");
+        //regex pattern(prefix + R"(\s+(\d+))");        // Для int 
         regex pattern(prefix + R"(\s+(\d+(\.\d+)?))");  // Для плавающей точки
 
         string strData;

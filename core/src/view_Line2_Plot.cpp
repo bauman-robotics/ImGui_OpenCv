@@ -27,6 +27,7 @@ extern atomic<double> smoothed_val_data_per_second_s;
 using namespace std;
 
 static void Pars_Data_And_Binary_Log(); 
+static void Pars_Data_And_Binary_Log_Com_port(); 
 
 void Clear_Socket_Data();
 void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data); 
@@ -43,8 +44,13 @@ void View_Group_Socket_Plot(void) {
     ImGui::BeginChild("Socket_Plot", ImVec2(L2_P1_SOCKET_PLOT_W, L2_P1_SOCKET_PLOT_H), true);    
     //ImGui::Text("Данные из Socket");
 
-    if (!freeze_en) {
-        Pars_Data_And_Binary_Log();
+    if (!freeze_en) { 
+        if (var.ctrl_mode) { //  Socket 
+            Pars_Data_And_Binary_Log();
+        }
+        else if (var.com_port_mode) {
+            Pars_Data_And_Binary_Log_Com_port();           
+        }    
     }
 
     //====  График значений ===========
@@ -277,6 +283,42 @@ static void Pars_Data_And_Binary_Log() {
     }
 }  
 //==================================================================================
+static void Pars_Data_And_Binary_Log_Com_port() {
+
+    // Парсинг данных
+    //if (var.socket.init_socket_done) {
+
+        if (!var.socket.hex_receive) {
+
+           y_coords = parseComPortData_Float(var.socket.data_prefix);
+           #ifdef LOG_ONE_VAL_TO_LINE
+                if (var.log.log_Is_Started) {
+                    if (y_coords.size()) {                    
+                   
+                        Add_Str_To_Log_File_HEX_Float(y_coords);
+                     }
+                } 
+           #endif 
+
+        } else {
+            // y_coords - only for logs 
+            //==== output ====
+            // var.socket.data_f 
+            // y_coords =  parseBinarySocketData_Float();  
+
+            // if (var.log.log_Is_Started) {
+            //     if (y_coords.size()) {                    
+                    
+            //         Add_Str_To_Log_File_HEX_Float(y_coords);
+            //     }
+            // } 
+        }               
+    //}
+}  
+//==================================================================================
+
+
+
 
 // Функция для децимации вектора в два раза
 std::vector<float> decimateVector(const std::vector<float>& input, size_t decimationThreshold) {

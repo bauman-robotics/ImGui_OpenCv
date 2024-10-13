@@ -14,7 +14,7 @@
 //#define DATA_PREFIX "data"
 //const std::string DATA_PREFIX = "d";
 const std::string DATA_PREFIX = "f";
-#define BINARY_PACKET 
+//#define BINARY_PACKET 
 
 //#define DEBUG_COUT 
 

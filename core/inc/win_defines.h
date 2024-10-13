@@ -24,7 +24,7 @@
 
 //=== LINE 1 ========
 #define L1_W (230)
-#define L1_H (150)
+#define L1_H (160)
 
 #define L1_P1_SOCKET_PORT_CTRL_W  (L1_W)
 #define L1_P1_SOCKET_PORT_CTRL_H  (L1_H)
@@ -49,8 +49,8 @@
 
 
 //====================
-#define SERIAL_CTRL_W     (280)
-#define SERIAL_CTRL_H     (270)
+#define SERIAL_CTRL_W     (L1_P1_SOCKET_PORT_CTRL_W)
+#define SERIAL_CTRL_H     (L1_P1_SOCKET_PORT_CTRL_H)
 
 #define SERIAL_PLOT_W     (575)
 #define SERIAL_PLOT_H     (270)

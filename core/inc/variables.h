@@ -49,7 +49,7 @@ typedef struct {
     int selected_port_index;
     bool init_serial_done;
     bool have_to_be_closed;
-    //==================    
+    //==================  
 } com_port_s;
 //================================
 typedef struct {  
