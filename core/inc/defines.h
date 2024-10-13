@@ -24,7 +24,7 @@ const uint16_t FLOAT_PRECISION   = 3;
 
 //#define MOUSE_CHART_ENABLE
 
-#define SOCKET_MSG_BUF_SIZE (1600)
+#define PORT_MSG_BUF_SIZE (1600)
 #define MAX_HEX_VALS_IN_PACKET (700)
 
 #define DISABLE_MOUSE_TEAM

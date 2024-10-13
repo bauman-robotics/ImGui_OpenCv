@@ -66,6 +66,7 @@ int main(int, char**)
              (!var.com_port.have_to_be_closed)) {
             
             InitSerial();
+            
         }        
         //====================
         if (!var.cv_mode) {

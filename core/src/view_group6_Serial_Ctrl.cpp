@@ -52,9 +52,17 @@ void View_Group_Serial_Ctrl(void) {
         if (!var.com_port.init_serial_done) {
 
             InitSerial();
-        }
+
+        }        
         
     }
+
+    //=== Temp =====    
+    if (!var.log.log_Is_Started) {
+
+        Create_Log_File();  // temp 
+    }
+
     ImGui::PopStyleColor();
     //========================================
     if (ImGui::Button("                    Close                     ")) {
@@ -67,3 +75,5 @@ void View_Group_Serial_Ctrl(void) {
 }
 //==================================================================================
 
+
+//Create_Log_File();  // temp 

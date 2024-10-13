@@ -63,7 +63,7 @@ int Init_All(GLFWwindow** window) {
         if (InitSerial() < 0) {
             //return -1;
             //Select_Mode(CTRL_MODE);
-        }
+        }        
     }
 
     Get_CPU_Load_Init(); 

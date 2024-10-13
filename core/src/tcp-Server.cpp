@@ -45,14 +45,14 @@ static mutex data_mutex;
 
 static vector<byte> socket_data;
 
-//static byte msg[SOCKET_MSG_BUF_SIZE];
+//static byte msg[PORT_MSG_BUF_SIZE];
 
 //==========================
-vector<byte> buffer1, buffer2;
-vector<byte>* active_buffer = &buffer1;     // Указатель на активный буфер
-vector<byte>* processing_buffer= &buffer2;  // Указатель на буфер для обработки
-mutex buffer_mutex;
-atomic<bool> data_ready(false);  // Флаг наличия данных для обработки
+static vector<byte> buffer1, buffer2;
+static vector<byte>* active_buffer = &buffer1;     // Указатель на активный буфер
+static vector<byte>* processing_buffer= &buffer2;  // Указатель на буфер для обработки
+static mutex buffer_mutex;
+static atomic<bool> data_ready(false);  // Флаг наличия данных для обработки
 
 
 //==========================
@@ -240,7 +240,7 @@ void ReadSocketData() {
     fd_set readfds;
     struct timeval timeout;
 
-    vector<byte> incoming_data(SOCKET_MSG_BUF_SIZE);  // Убедитесь, что вектор достаточно велик
+    vector<byte> incoming_data(PORT_MSG_BUF_SIZE);  // Убедитесь, что вектор достаточно велик
 
     while(keep_running)   {
 
@@ -271,7 +271,7 @@ void ReadSocketData() {
 
                 //==================================================================
                              
-                bytesRead_n = recv(newSd, incoming_data.data(), SOCKET_MSG_BUF_SIZE, 0);
+                bytesRead_n = recv(newSd, incoming_data.data(), PORT_MSG_BUF_SIZE, 0);
 
                 if (bytesRead_n < 0) {
                     // Обработка ошибки или завершение чтения

@@ -26,7 +26,7 @@ extern atomic<double> smoothed_val_data_per_second_s;
 
 using namespace std;
 
-void Pars_Data_And_Binary_Log(); 
+static void Pars_Data_And_Binary_Log(); 
 
 void Clear_Socket_Data();
 void plotData(float y_min, float y_max, ImVec2 available_size, std::vector<float>& data); 
@@ -244,7 +244,7 @@ void Clear_Socket_Data() {
 }
 //==================================================================================
 
-void Pars_Data_And_Binary_Log() {
+static void Pars_Data_And_Binary_Log() {
 
     // Парсинг данных
     if (var.socket.init_socket_done) {

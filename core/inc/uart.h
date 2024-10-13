@@ -2,6 +2,7 @@
 
 void ReadSerialData();
 std::vector<int> parseComPortData(const std::string& prefix);
+std::vector<float> parseComPortData_Float(const string& prefix);
 int InitSerial(); 
 void CloseSerial();
 double GetPacketsPerSecond();
