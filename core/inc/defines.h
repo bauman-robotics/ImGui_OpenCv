@@ -14,13 +14,13 @@
 //#define DATA_PREFIX "data"
 //const std::string DATA_PREFIX = "d";
 const std::string DATA_PREFIX = "f";
-//#define BINARY_PACKET 
+#define BINARY_PACKET 
 
 //#define DEBUG_COUT 
 
 const uint16_t BYNARY_PACKET_INT_KEY   = 2255;
 //const uint16_t BYNARY_PACKET_FLOAT_KEY = 2233;  // was errors 
-const uint16_t BYNARY_PACKET_FLOAT_KEY = 5678;
+const uint16_t BYNARY_PACKET_FLOAT_KEY = 17531;
 
 const uint16_t FLOAT_PRECISION   = 3;
 
