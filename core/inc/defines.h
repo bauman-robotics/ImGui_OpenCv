@@ -11,7 +11,6 @@
 
 #define SERVER_SOCKET_PORT (18082)
 
-//#define DATA_PREFIX "data"
 //const std::string DATA_PREFIX = "d";
 const std::string DATA_PREFIX = "f";
 #define BINARY_PACKET 

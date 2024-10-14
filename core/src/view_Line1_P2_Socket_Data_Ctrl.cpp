@@ -14,7 +14,7 @@ void View_Group_Socket_Data_Ctrl() {
     if (ImGui::RadioButton("Saw test", selected_radio == 0)) { 
         selected_radio = 0; 
 
-        sprintf(var.socket.send.message, "%s", "Red"); 
+        sprintf(var.socket.send.message, "%s", "Saw"); 
         var.socket.send.need_to_be_sended.store(1);
     }
 
@@ -23,13 +23,13 @@ void View_Group_Socket_Data_Ctrl() {
     if (ImGui::RadioButton("Sin test", selected_radio == 1)) { 
         selected_radio = 1; 
       
-        sprintf(var.socket.send.message, "%s", "Green");         
+        sprintf(var.socket.send.message, "%s", "Sin");         
         var.socket.send.need_to_be_sended.store(1); 
     }
 
     if (ImGui::RadioButton("Voltage", selected_radio == 2)) {
         selected_radio = 2; 
-        sprintf(var.socket.send.message, "%s", "Blue");          
+        sprintf(var.socket.send.message, "%s", "Voltage");          
         var.socket.send.need_to_be_sended.store(1);      
     }
     
