@@ -36,7 +36,7 @@ void View_Group_Serial_Ctrl(void) {
 
     //========================================
 
-    if (ImGui::Button("    Review    ")) {
+    if (ImGui::Button("    Rescan    ")) {
         var.com_port.ports_list = getConnectedTTYACMPorts();
     }
 
@@ -106,6 +106,8 @@ void View_Group_Serial_Ctrl(void) {
 
     //============  Количество значений в секунду =======
     double current_val_data_per_second = Get_Val_Data_PerSecond(); //parsed_data.size();//
+
+    var.vals_per_seconds_smoothed.store(current_val_data_per_second);  // temp 
 
     smoothed_val_data_per_second.store(CalculateEMA(current_val_data_per_second, smoothed_val_data_per_second.load(), alpha));
     // Использование stringstream для форматирования строки

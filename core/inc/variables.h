@@ -42,7 +42,7 @@ typedef struct {
     string name;
     string last_port_name;
     string data_prefix;
-    uint32_t i_baud_rate;
+    //uint32_t i_baud_rate;
     //==================
     vector<const char*> ports_list;
     string selected_port;
@@ -50,6 +50,7 @@ typedef struct {
     bool init_serial_done;
     bool have_to_be_closed;
     //==================  
+    bool auto_open;
 } com_port_s;
 //================================
 typedef struct {  
@@ -64,14 +65,22 @@ typedef struct {
     int order_I;
     bool enabled;
 } filter_t;
+//================================
+typedef struct {
+    bool voltage;
+    bool current;
+    bool power;
+    int signal_type;
+} mode_type;
 
 //================================
 typedef struct {
     filter_t filter;
     int16_t i_lim_mA;
+    mode_type mode;
 } ina226_t;
-//================================
 
+//================================
 typedef struct {  
     //==================     
     string data_prefix;
@@ -110,6 +119,13 @@ typedef struct {
 
 //================================
 
+typedef struct {
+    uint32_t sec;
+    bool freeze;
+} Timer_Type;
+
+//================================
+
 // typedef struct {
 //     atomic<int32_t> parser_data_size;
 //     atomic<int32_t> new_parser_data_size;
@@ -119,6 +135,7 @@ typedef struct {
 
 typedef struct {   
     bool cv_mode;
+    bool post_request_mode;    
     bool ctrl_mode;
     bool com_port_mode;
     //==================
@@ -140,8 +157,16 @@ typedef struct {
     
   //  Debug_Type debug;
 
-} variables;
+    double calc_power_mWxH;
+    double power_mWxH_average;
 
+    
+    bool time_1_sec_is_over;   // not used  
+
+    atomic<double> vals_per_seconds_smoothed; 
+    Timer_Type timer;
+
+} variables;
 
 
 extern variables var;

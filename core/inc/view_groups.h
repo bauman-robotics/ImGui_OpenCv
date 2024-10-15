@@ -7,6 +7,8 @@ void View_Group_Mouse_Plot();
 void View_Group_Serial_Plot(); // Serial data
 void View_Group_Serial_Ctrl(); // Serial ctrl
 
+void View_Group_Post_Request_Ctrl(); // Post Request 
+
 void View_Group_Socket_Com_Plot(); // Socket data
 void View_Group_Socket_Port_Ctrl(); // Socket ctrl
 

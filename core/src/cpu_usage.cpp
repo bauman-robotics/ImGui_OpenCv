@@ -60,8 +60,13 @@ double getCPULoad(pid_t pid, double interval) {
     #ifdef DEBUG_COUT
            //cout << "getCPULoad()" << endl;
     #endif 
-
+    
     this_thread::sleep_for(chrono::seconds(static_cast<int>(interval)));
+
+    var.time_1_sec_is_over = 1; 
+    if (!var.timer.freeze) {
+        var.timer.sec ++; 
+    }
 
     double cpu_time_end = getCPUTime(pid);
     gettimeofday(&end, nullptr);

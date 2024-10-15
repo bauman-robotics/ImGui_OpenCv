@@ -9,6 +9,7 @@ std::set<std::string> active_windows = { "[MainWindow]", "[CustomSettings]" };
 
 void Keys_Parser(std::string key, std::string value); 
 uint32_t stringToUint32(const std::string& str);
+void Set_Signal_Type_Flags(int signal_type); 
 //==================================================================================
 
 void SaveCustomSettings(const char* filename) {
@@ -23,17 +24,29 @@ void SaveCustomSettings(const char* filename) {
     char buf_prefix[20] = {0}; // 
     sprintf(buf_prefix, "data_prefix=%s\n", var.com_port.data_prefix.c_str()); // Используем \n для переноса строки
 
-    char buf_baud_rate[20] = {0}; // 
-    sprintf(buf_baud_rate, "baud_rate=%d\n", var.com_port.i_baud_rate); // Используем \n для переноса строки
+    // char buf_baud_rate[20] = {0}; // 
+    // sprintf(buf_baud_rate, "baud_rate=%d\n", var.com_port.i_baud_rate); // Используем \n для переноса строки
 
+    char buf_auto_open[20] = {0}; // 
+    if (var.com_port_mode) {
+        sprintf(buf_auto_open, "auto_open=%d\n", (int)var.com_port.init_serial_done); // Используем \n для переноса строки
+    } else if (var.ctrl_mode) {
+        sprintf(buf_auto_open, "auto_open=%d\n", (int)var.socket.init_socket_done); // Используем \n для переноса строки
+    } else {
+        sprintf(buf_auto_open, "auto_open=%d\n", 0);
+    }
 
+    char buf_signal_type[20] = {0}; // 
+    sprintf(buf_signal_type, "signal_type=%d\n", var.socket.ina226.mode.signal_type); // Используем \n для переноса строки
 
     if (file.is_open()) {
         file << "[CustomSettings]\n";
         file << buf_mode;
         file << buf_port;
-        file << buf_baud_rate;         
-        file << buf_prefix;
+        //file << buf_baud_rate; 
+        file << buf_prefix;       
+        file << buf_auto_open;
+        file << buf_signal_type;
 
         file.close();
     }
@@ -65,13 +78,17 @@ void LoadCustomSettings(const char* filename) {
 void Keys_Parser(std::string key, std::string value) {
     //================================    
     if (key == "Mode") {
-        if (value == "1") {
+        if (value == "0") {
+            Select_Mode(CTRL_MODE);
+        }        
+        else if (value == "1") {
             Select_Mode(COM_PORT_MODE);
         }
         else if (value == "2") {
             Select_Mode(OPENCV_MODE);
-        } else {
-            Select_Mode(CTRL_MODE);
+        }
+        else {
+            Select_Mode(POST_REQUEST_MODE);
         }       
     }
     //================================
@@ -84,17 +101,43 @@ void Keys_Parser(std::string key, std::string value) {
         var.socket.data_prefix = value;        
     }
     //================================   
-    if (key == "baud_rate") {
-        uint32_t i_value = 115200;
+    // if (key == "baud_rate") {
+    //     uint32_t i_value = 115200;
+    //     try {
+    //         i_value = stringToUint32(value);
+    //         std::cout << "Converted value: " << value << std::endl;
+    //     } catch (const std::exception& e) {
+    //         std::cerr << "Conversion failed: " << e.what() << std::endl;
+    //     }
+
+    //     var.com_port.i_baud_rate = i_value;
+    // }
+    //================================   
+    if (key == "auto_open") {
+        uint32_t i_value = 0;
         try {
             i_value = stringToUint32(value);
             std::cout << "Converted value: " << value << std::endl;
         } catch (const std::exception& e) {
             std::cerr << "Conversion failed: " << e.what() << std::endl;
         }
+        var.com_port.auto_open = (bool)i_value;  
+    }      
+    //================================   
+    if (key == "signal_type") {
+        uint32_t i_value = 0;
+        try {
+            i_value = stringToUint32(value);
+            std::cout << "Converted value: " << value << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Conversion failed: " << e.what() << std::endl;
+        }
+        var.socket.ina226.mode.signal_type = (int)i_value;  
 
-        var.com_port.i_baud_rate = i_value;
-    }    
+        Set_Signal_Type_Flags(var.socket.ina226.mode.signal_type);
+
+    }        
+    
     //================================ 
 }
 //==================================================================================
@@ -191,4 +234,39 @@ uint32_t stringToUint32(const std::string& str) {
         std::cerr << "Out of range: " << e.what() << std::endl;
         throw;
     }
+}
+//==================================================================================
+
+void Set_Signal_Type_Flags(int signal_type) {
+
+    switch (signal_type) {
+        case 0: 
+            var.socket.ina226.mode.voltage = 0;
+            var.socket.ina226.mode.current = 0;
+            var.socket.ina226.mode.power   = 0; 
+        break;
+        
+        case 1: 
+            var.socket.ina226.mode.voltage = 0;
+            var.socket.ina226.mode.current = 0;
+            var.socket.ina226.mode.power   = 0; 
+        break;
+        case 2:
+            var.socket.ina226.mode.voltage = 1;
+            var.socket.ina226.mode.current = 0;
+            var.socket.ina226.mode.power   = 1;  
+        break;
+        case 3:
+            var.socket.ina226.mode.voltage = 0;
+            var.socket.ina226.mode.current = 1;
+            var.socket.ina226.mode.power   = 0; 
+
+        break;
+        case 4:
+            var.socket.ina226.mode.voltage = 0;
+            var.socket.ina226.mode.current = 0;
+            var.socket.ina226.mode.power   = 1;              
+        break;                                                
+    }
+
 }

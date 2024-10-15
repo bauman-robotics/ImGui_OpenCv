@@ -46,7 +46,7 @@ static mutex buffer_mutex;
 static atomic<bool> data_ready(false);  // Флаг наличия данных для обработки
 //==========================
 
-
+static void Power_Calculate(float val); 
 int OpenSerialPort(const char* device);
 void ReadSerialData();
 void Start_Serial_Thread();
@@ -268,6 +268,10 @@ vector<float> parseComPortData_Float(const string& prefix) {
                     //var.socket.data_f.push_back(static_cast<float>(value));
                     results.push_back(value_f);  // for log
                     var.socket.data_f.push_back(value_f);
+
+                    #ifdef CALC_POWER_ENABLE
+                        Power_Calculate(value_f);
+                    #endif
 
                     val_data_count++;
                     #ifdef DEBUG_COUT
@@ -528,9 +532,11 @@ vector<float> parseBinary_Com_PortData_Float() {
                         for (size_t i = 0; i < (header.full_packet_size.val - HEADER_SIZE); i += 2) {
                             int16_t value = (static_cast<int16_t>(local_processing_buffer.at(pos + i + 1)) << 8)
                                             | static_cast<int16_t>(local_processing_buffer.at(pos + i));
+
                             results.push_back(static_cast<float>(value));  // for log
                             var.socket.data_f.push_back(static_cast<float>(value));
                             val_data_count++;
+                            
                         }
                         pos += (header.full_packet_size.val - HEADER_SIZE);
                     } else {
@@ -547,6 +553,14 @@ vector<float> parseBinary_Com_PortData_Float() {
                             float value;
                             std::memcpy(&value, &local_processing_buffer[pos + i], sizeof(float));
                             
+                            if ((value > MAX_PLOT_VAL)  || (value < -MAX_PLOT_VAL)) {
+                                value = -1;   
+                            } // temp 
+
+                            #ifdef CALC_POWER_ENABLE
+                                Power_Calculate(value);
+                            #endif                         
+
                             results.push_back(value);  // for log
                             var.socket.data_f.push_back(value);
                             val_data_count++;
@@ -567,3 +581,37 @@ vector<float> parseBinary_Com_PortData_Float() {
     return results;
 }
 //===========================================================================================
+
+
+// Функция для вычисления и накопления потраченной энергии
+static void Power_Calculate(float currentPower) {
+
+    int measurementsPerSecond;
+
+    static float totalPowerPerSecond = 0;
+    static int count = 0;   
+
+    if (var.socket.packet_period_ms) {
+        measurementsPerSecond = 1000 * var.socket.val_in_packet / var.socket.packet_period_ms ;    
+    }
+
+    if (measurementsPerSecond) {
+        // Время между вызовами в секундах
+        double timeBetweenCalls = 1.0 / measurementsPerSecond;
+        // Энергия за один вызов в милливатт-часах
+        double energyIncrement = (currentPower * timeBetweenCalls) / 3600.0;
+        // Обновляем суммарное значение энергии
+        var.calc_power_mWxH += energyIncrement;
+    }
+
+    // Накапливаем мощность за 1 секунду 
+    totalPowerPerSecond += currentPower;
+    count++;
+
+    // Если прошла секунда, вычисляем среднюю мощность и сбрасываем счетчики
+    if (count == measurementsPerSecond) {
+        var.power_mWxH_average = totalPowerPerSecond / count;
+        totalPowerPerSecond = 0;
+        count = 0;
+    }
+}

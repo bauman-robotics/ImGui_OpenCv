@@ -20,6 +20,9 @@ void Menu_Item(void) {
     ImGui::PushStyleColor(ImGuiCol_Button, var.com_port_mode ? activeColor : defaultColor);
     if (ImGui::Button("                         Com-port                           ")) {
 
+        sprintf(var.socket.send.message, "%s", "Serial");          
+        var.socket.send.need_to_be_sended.store(1); 
+
         Select_Mode(COM_PORT_MODE);  
         InitSerial(); 
         Close_CV();    
@@ -30,6 +33,9 @@ void Menu_Item(void) {
     ImGui::PushStyleColor(ImGuiCol_Button, var.ctrl_mode ? activeColor : defaultColor);
     if (ImGui::Button("                      Socket-Server                         ")) {
         
+        sprintf(var.socket.send.message, "%s", "Wifi");          
+        var.socket.send.need_to_be_sended.store(1); 
+
         Select_Mode(CTRL_MODE);  
         CloseSerial();
         Close_CV();
@@ -37,8 +43,22 @@ void Menu_Item(void) {
     ImGui::PopStyleColor();
     ImGui::SameLine();
 
+    ImGui::PushStyleColor(ImGuiCol_Button, var.post_request_mode ? activeColor : defaultColor);
+    if (ImGui::Button("    Post Request   ")) {
+
+        sprintf(var.socket.send.message, "%s", "Post");          
+        var.socket.send.need_to_be_sended.store(1);         
+
+        Select_Mode(POST_REQUEST_MODE); 
+        CloseSerial();
+
+    }
+    ImGui::PopStyleColor();
+    ImGui::SameLine();
+
     ImGui::PushStyleColor(ImGuiCol_Button, var.cv_mode ? activeColor : defaultColor);
-    if (ImGui::Button("                         OpenCv                           ")) {
+    //if (ImGui::Button("                         OpenCv                           ")) {    
+    if (ImGui::Button("    OpenCv    ")) {
 
         Select_Mode(OPENCV_MODE); 
         CloseSerial();

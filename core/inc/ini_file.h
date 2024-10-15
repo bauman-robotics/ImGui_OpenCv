@@ -8,3 +8,4 @@ void LoadWindowPosition(GLFWwindow* window, const char* ini_filename);
 
 void CleanIniFile(const char* ini_filename); 
 
+void Set_Signal_Type_Flags(int signal_type); 

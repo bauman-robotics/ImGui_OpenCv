@@ -61,13 +61,12 @@ int main(int, char**)
 
         Menu_Item();
         //====================
-        if  ((var.com_port_mode)              &&
-             (!var.com_port.init_serial_done) &&
-             (!var.com_port.have_to_be_closed)) {
+        // if  ((var.com_port_mode)              &&
+        //      (!var.com_port.init_serial_done) &&
+        //      (!var.com_port.have_to_be_closed)) {
             
-            InitSerial();
-            
-        }        
+        //     InitSerial();            
+        // }        
         //====================
         if (!var.cv_mode) {
             // Отображение окна "Ctrl"

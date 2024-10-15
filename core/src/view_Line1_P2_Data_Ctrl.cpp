@@ -8,14 +8,17 @@ void View_Group_Socket_Data_Ctrl() {
     //ImGui::Text("Группа 2");
 
     // Радиокнопки и комбобокс
-    static int selected_radio = 1;
+    static int selected_radio = 3; // Current 
 
+    selected_radio = var.socket.ina226.mode.signal_type;
 
     if (ImGui::RadioButton("Saw test", selected_radio == 0)) { 
         selected_radio = 0; 
 
         sprintf(var.socket.send.message, "%s", "Saw"); 
         var.socket.send.need_to_be_sended.store(1);
+        var.socket.ina226.mode.signal_type = selected_radio;
+        Clear_Socket_Com_Data();
     }
 
     ImGui::SameLine();
@@ -25,12 +28,19 @@ void View_Group_Socket_Data_Ctrl() {
       
         sprintf(var.socket.send.message, "%s", "Sin");         
         var.socket.send.need_to_be_sended.store(1); 
+        var.socket.ina226.mode.signal_type = selected_radio; 
+        Clear_Socket_Com_Data();      
     }
 
     if (ImGui::RadioButton("Voltage", selected_radio == 2)) {
         selected_radio = 2; 
         sprintf(var.socket.send.message, "%s", "Voltage");          
-        var.socket.send.need_to_be_sended.store(1);      
+        var.socket.send.need_to_be_sended.store(1);   
+        var.socket.ina226.mode.voltage = 1;
+        var.socket.ina226.mode.current = 0;
+        var.socket.ina226.mode.power   = 0;  
+        var.socket.ina226.mode.signal_type = selected_radio;
+        Clear_Socket_Com_Data();
     }
     
     ImGui::SameLine();
@@ -39,6 +49,11 @@ void View_Group_Socket_Data_Ctrl() {
         selected_radio = 3; 
         sprintf(var.socket.send.message, "%s", "Current");          
         var.socket.send.need_to_be_sended.store(1);      
+        var.socket.ina226.mode.voltage = 0;
+        var.socket.ina226.mode.current = 1;
+        var.socket.ina226.mode.power   = 0;  
+        var.socket.ina226.mode.signal_type = selected_radio; 
+        Clear_Socket_Com_Data();     
     }
 
     ImGui::SameLine();
@@ -47,13 +62,19 @@ void View_Group_Socket_Data_Ctrl() {
         selected_radio = 4; 
         sprintf(var.socket.send.message, "%s", "Power");          
         var.socket.send.need_to_be_sended.store(1);      
+        var.socket.ina226.mode.voltage = 0;
+        var.socket.ina226.mode.current = 0;
+        var.socket.ina226.mode.power   = 1;
+        var.socket.ina226.mode.signal_type = selected_radio;        
+        var.calc_power_mWxH = 0;
+        Clear_Socket_Com_Data();
     }
 
 
     static const char* combo_items[] = {"5", "10", "15", "20", "25", "50", "100", "200", "500", "1000", "2000", "3000", "5000" };
     //=========================================
-    static int combo_current_item = 1;
-    var.socket.packet_period_ms = 10;
+    static int combo_current_item = 3;
+    var.socket.packet_period_ms = 20;
     //=========================================
     // Устанавливаем ширину следующего элемента. Например, 200.0f пикселей.
     ImGui::SetNextItemWidth(70.0f);
@@ -85,6 +106,12 @@ void View_Group_Socket_Data_Ctrl() {
         //std::cout << "Период пакетов = " << combo_items[combo_current_item] << std::endl;
         var.socket.val_in_packet = atoi(combo_items_num[combo_current_item_num]);
         sprintf(var.socket.send.message, "%s%s", "NUM", combo_items_num[combo_current_item_num]);          
+        var.socket.send.need_to_be_sended.store(1); 
+    }
+
+    if (ImGui::Button("Default")) {
+
+        sprintf(var.socket.send.message, "%s", "Default");          
         var.socket.send.need_to_be_sended.store(1); 
     }
 

@@ -53,13 +53,14 @@ void View_Group_Socket_Com_Plot(void) {
             Pars_Data_And_Binary_Log_Com_port();           
         }    
     }
+    //var.calc_power_mWxH = y_coords.size();
 
     //====  График значений ===========
     if (var.socket.chart_enable) {
 
         // Радиокнопки для выбора типа графика
         static int old_graph_type = 0; 
-        static int graph_type = 0; // 0 - линии, 1 - гистограмма, 2 - окно последних значений
+        static int graph_type = 2; // 0 - линии, 1 - гистограмма, 2 - окно последних значений
         ImGui::RadioButton("Линии", &graph_type, 0);
         ImGui::SameLine();
         ImGui::RadioButton("Гистограмма", &graph_type, 1);
@@ -69,12 +70,13 @@ void View_Group_Socket_Com_Plot(void) {
         ImGui::SameLine();
         //==================================================================================
         // Слайдер для регулировки ширины окна последних значений
-        static int window_size = 1000; // Размер окна последних значений
+        static int window_size = 10000; // Размер окна последних значений
+        const static int MAX_WIN_WIDTH = 50000;
         if (graph_type == 2) {
-            ImGui::SliderInt(" ", &window_size, 1, 10000);
+            ImGui::SliderInt(" ", &window_size, 1, MAX_WIN_WIDTH);
         } else {
             ImGui::BeginDisabled();
-            ImGui::SliderInt(" ", &window_size, 1, 10000);
+            ImGui::SliderInt(" ", &window_size, 1, MAX_WIN_WIDTH);
             ImGui::EndDisabled();
         }
         if ((graph_type != old_graph_type) && (graph_type == 2)) {
@@ -120,6 +122,7 @@ void View_Group_Socket_Com_Plot(void) {
                 y_max = *std::max_element(var.socket.data_f.begin(), var.socket.data_f.end());
             }            
         }
+
         // === Количество знаков после запятой, метки оси Y ===
         if (((y_max - y_min) < 0.001))                              label_precision = 5;
         if (((y_max - y_min) >=0.001) && ((y_max - y_min) < 0.01))  label_precision = 4;
@@ -140,24 +143,27 @@ void View_Group_Socket_Com_Plot(void) {
         // Получаем начальную позицию для рисования графика
         ImVec2 graph_start = ImGui::GetCursorScreenPos();
 
-        // Рисуем вертикальную сетку и метки оси Y
-        for (int i = 0; i <= grid_lines_y; ++i) {
-            float y_pos = graph_start.y + plot_height - (y_step * i);
-            ImVec2 p1 = ImVec2(graph_start.x, y_pos);
-            ImVec2 p2 = ImVec2(graph_start.x + available_size.x, y_pos);
-            ImGui::GetWindowDrawList()->AddLine(p1, p2, IM_COL32(200, 200, 200, 100)); 
+        if ((y_max < MAX_PLOT_VAL) && (y_min > -MAX_PLOT_VAL) && (y_max - y_min < MAX_PLOT_VAL)) {
 
-            // Форматируем текст метки с ограничением количества знаков после запятой
-            std::ostringstream label_stream;
-            label_stream << std::fixed << std::setprecision(label_precision) << (y_min + (y_max - y_min) * i / grid_lines_y);
-            std::string label = label_stream.str();
+            // Рисуем вертикальную сетку и метки оси Y
+            for (int i = 0; i <= grid_lines_y; ++i) {
+                float y_pos = graph_start.y + plot_height - (y_step * i);
+                ImVec2 p1 = ImVec2(graph_start.x, y_pos);
+                ImVec2 p2 = ImVec2(graph_start.x + available_size.x, y_pos);
+                ImGui::GetWindowDrawList()->AddLine(p1, p2, IM_COL32(200, 200, 200, 100)); 
 
-            // Рассчитываем позицию текста
-            ImVec2 text_size = ImGui::CalcTextSize(label.c_str());
-            ImVec2 text_pos = ImVec2(graph_start.x + 5, y_pos - text_size.y * 0.5f);            
-            //ImGui::GetWindowDrawList()->AddText(text_pos, IM_COL32(255, 255, 255, 255), label.c_str()); 
-            ImGui::GetWindowDrawList()->AddText(text_pos, IM_COL32(255, 255, 0, 255), label.c_str()); 
-        }        
+                // Форматируем текст метки с ограничением количества знаков после запятой
+                std::ostringstream label_stream;
+                label_stream << std::fixed << std::setprecision(label_precision) << (y_min + (y_max - y_min) * i / grid_lines_y);
+                std::string label = label_stream.str();
+
+                // Рассчитываем позицию текста
+                ImVec2 text_size = ImGui::CalcTextSize(label.c_str());
+                ImVec2 text_pos = ImVec2(graph_start.x + 5, y_pos - text_size.y * 0.5f);            
+                //ImGui::GetWindowDrawList()->AddText(text_pos, IM_COL32(255, 255, 255, 255), label.c_str()); 
+                ImGui::GetWindowDrawList()->AddText(text_pos, IM_COL32(255, 255, 0, 255), label.c_str()); 
+            }    
+        }    
 
         //int values_per_second = (int)smoothed_val_data_per_second_s.load();
         int values_per_second = 0;
@@ -234,7 +240,61 @@ void View_Group_Socket_Com_Plot(void) {
         //========================================
 
         ImGui::Checkbox("Freeze", &freeze_en);
+        //================================
+        if (var.socket.ina226.mode.power) {  
+            ImGui::SameLine();
+            ImGui::Text("   ");    
 
+            ImGui::SameLine();
+            // Кнопка для очистки графика
+            if (ImGui::Button("Очистить Power")) { 
+                var.calc_power_mWxH = 0;
+                Clear_Socket_Com_Data();
+            }
+            ImGui::SameLine();
+            ImGui::Text("  P = %0.2f  mW*h", var.calc_power_mWxH);     
+
+            ImGui::SameLine();
+            
+            ImGui::Text("      Aver P = %0.0f  mW", var.power_mWxH_average); 
+
+        } else if (var.socket.ina226.mode.current) {  
+            ImGui::SameLine();
+            ImGui::Text("   ");    
+
+            ImGui::SameLine();
+            // Кнопка для очистки графика
+            if (ImGui::Button("Очистить Current")) { 
+                var.calc_power_mWxH = 0;
+                Clear_Socket_Com_Data();
+            }
+            ImGui::SameLine();
+            ImGui::Text("  I = %0.2f  mA*h", var.calc_power_mWxH);     
+
+            ImGui::SameLine();
+            
+            ImGui::Text("      Aver P = %0.0f  mA", var.power_mWxH_average); 
+
+        } else if (var.socket.ina226.mode.voltage) {  
+
+            ImGui::SameLine();
+            
+            ImGui::Text("                                                 Aver V = %0.3f  mV", var.power_mWxH_average); 
+
+        }
+        //=====================================
+
+        // Получаем позицию курсора
+        cursor_pos = ImGui::GetCursorScreenPos();
+        // Перемещаем курсор 
+        ImGui::SetCursorScreenPos(ImVec2(L2_P1_SOCKET_PLOT_W - 220, cursor_pos.y-24));
+
+        // Кнопка для очистки таймера
+        if (ImGui::Button("Очистить Timer")) { 
+            var.timer.sec = 0;
+        }
+        ImGui::SameLine();
+        ImGui::Text("Timer = %d  sec", var.timer.sec);     
     }
 
     //======================================================
@@ -248,6 +308,8 @@ void Clear_Socket_Com_Data() {
     //parsed_data.clear();
     var.socket.data_f.clear();
     y_coords.clear();
+
+    var.timer.sec = 0; 
 }
 //==================================================================================
 

@@ -4,7 +4,8 @@
 #include "cpu_usage.h"
 #include "defines.h"
 #include "win_defines.h"
-
+#include "tcp-Server.h"
+#include "log_file.h"
 // Прототипы функций
 int InitGLFWAndImGui(GLFWwindow** window);
 void CreateTexture();
@@ -14,13 +15,19 @@ void Close_CV();
 //=========================================================================
 int Init_All(GLFWwindow** window) {
 
+    var.power_mWxH_average = 0;
 
+    var.com_port.ports_list = getConnectedTTYACMPorts();
 
     if (InitGLFWAndImGui(window) != 0) {
         return -1;
     }
 
     LoadFonts();
+
+    var.socket.ina226.mode.voltage = 0;
+    var.socket.ina226.mode.current = 1;
+    var.socket.ina226.mode.power   = 0; 
 
     var.cv.playing = 1;
     var.Init_CV_done = 0;
@@ -36,11 +43,19 @@ int Init_All(GLFWwindow** window) {
 
     printf("DATA_PREFIX: \"%s\"\n", DATA_PREFIX.c_str());
 
-    var.com_port.i_baud_rate = 115200;
+    //var.com_port.i_baud_rate = 115200;
     
     var.socket.port = SERVER_SOCKET_PORT;
 
     var.socket.chart_enable = 1;
+
+    Set_Signal_Type_Flags(SIGNAL_TYPE_DEFAULT);
+
+    #ifdef AUTO_OPEN_SERIAL_PORT_AT_START
+        var.com_port.auto_open = 1;
+    #else 
+        var.com_port.auto_open = 0;           
+    #endif 
 
     #ifdef BINARY_PACKET
         var.socket.hex_receive = 1;    
@@ -65,12 +80,17 @@ int Init_All(GLFWwindow** window) {
 
     LoadCustomSettings(var.io->IniFilename);
 
-    if (var.com_port_mode) {
+    if (var.com_port.auto_open) {
+        if (var.com_port_mode) {
 
-        if (InitSerial() < 0) {
-            //return -1;
-            //Select_Mode(CTRL_MODE);
-        }        
+            if (InitSerial() < 0) {
+                //return -1;
+                //Select_Mode(CTRL_MODE);
+            }        
+        } else if (var.ctrl_mode) {
+
+            Socket_Server_Init(var.socket.port);
+        }
     }
 
     Get_CPU_Load_Init(); 
@@ -222,24 +242,35 @@ void InitFrameSize(int size) {
 void Select_Mode(int mode){
     switch (mode){
     case (CTRL_MODE):
-        var.ctrl_mode     = true;
-        var.com_port_mode = false;
-        var.cv_mode       = false;
+        var.ctrl_mode         = true;
+        var.com_port_mode     = false;
+        var.cv_mode           = false;    
+        var.post_request_mode = false;    
     break;
     case (COM_PORT_MODE):
-        var.ctrl_mode     = false;
-        var.com_port_mode = true;
-        var.cv_mode       = false;
+        var.ctrl_mode         = false;
+        var.com_port_mode     = true;
+        var.cv_mode           = false; 
+        var.post_request_mode = false;           
     break;
     case (OPENCV_MODE):
-        var.ctrl_mode     = false;
-        var.com_port_mode = false;
-        var.cv_mode       = true;
+        var.ctrl_mode         = false;
+        var.com_port_mode     = false;
+        var.cv_mode           = true; 
+        var.post_request_mode = false; 
     break;
+    case (POST_REQUEST_MODE):
+        var.ctrl_mode         = false;
+        var.com_port_mode     = false;
+        var.cv_mode           = false; 
+        var.post_request_mode = true; 
+    break;    
+    
     default:
-        var.ctrl_mode     = true;
-        var.com_port_mode = false;
-        var.cv_mode       = false;
+        var.ctrl_mode         = false;
+        var.com_port_mode     = true;
+        var.cv_mode           = false; 
+        var.post_request_mode = false;   
     break;
     }
 } 
@@ -255,6 +286,9 @@ int Get_Mode() {
     }
     if (var.cv_mode) {
         return OPENCV_MODE;
+    }
+    if (var.post_request_mode) {
+        return POST_REQUEST_MODE;
     }
 
     return -1;
